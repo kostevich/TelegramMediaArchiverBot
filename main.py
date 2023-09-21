@@ -49,9 +49,9 @@ def bot_message(message):
     # Получение данных фотографии.
     file_info = bot.get_file(photo_id) 
     # Отпраляем запрос, для получения фото.
-    file = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(token, file_info.file_path)) 
+    file = requests.get(f'https://api.telegram.org/file/bot{token}/{file_info.file_path}') 
     # Даем название изображениям.
-    file_name = 'photo' + str(message.date) + '.jpg' 
+    file_name = 'photo' + message.photo[-1].file_id + '.jpg' 
     # Открываем файл фотографии.
     with open(file_name, 'wb') as f:
         # Сохраняем изображение.
