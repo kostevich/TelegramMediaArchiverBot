@@ -6,6 +6,8 @@ from telebot import types
 from settings import *
 # Импортируем requests для отправки запросов.
 import requests
+# Импортируем os для работы с локальным хранилищем фото.
+import os
 
 # Токен для работы определенного бота телегамм.
 bot = telebot.TeleBot(token)
@@ -53,11 +55,14 @@ def bot_message(message):
     # Даем название изображениям.
     file_name = 'photo' + message.photo[-1].file_id + '.jpg' 
     # Открываем файл фотографии.
-    with open(file_name, 'wb') as f:
+    with open(f'upload/{file_name}', 'wb') as f:
         # Сохраняем изображение.
         f.write(file.content) 
-    # Вывод информации о успешности операции.
-    bot.send_message(message.chat.id, 'Коллекция пополнена.')
+    # Количество изображений в папке.
+    number_files = len(os.listdir('upload'))
+    # Вывод информации об успешности операции и количестве добавленных фотографий.
+    bot.send_message(message.chat.id, f'В коллекцию добавлено {number_files} изображений.')
+    
    
 
 # Запуск работы кода.
