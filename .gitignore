@@ -1,5 +1,10 @@
+# Visual Studio project files.
+TelegramMediaArchiverBot.pyproj
+TelegramMediaArchiverBot.sln
+.vs
 
-__pycache__/settings.cpython-311.pyc
-__pycache__/token.cpython-311.pyc
-settings.py
-photo1694354687.jpg
+# Users media data.
+Uploads
+
+# Python cache.
+__pycache__
