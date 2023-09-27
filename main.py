@@ -144,7 +144,11 @@ def bot_message(message):
         bot.send_message(message.chat.id, f'Формирование коллекции окончено. В коллекции находится {number_files} файлов. Из них {number_images} изображений и {number_videos} видео.', reply_markup=markup)
         # Сохранение коллекции в архив.
         shutil.make_archive('archive', 'zip', 'Uploads' )
-   
+        # Открытие архива в виде файла.
+        archive = open('archive.zip',"rb")
+        # Отправка заархивированного файла пользователю.
+        bot.send_document(message.chat.id, archive)
+
 
 # Запуск работы кода.
 if __name__ == "__main__":
