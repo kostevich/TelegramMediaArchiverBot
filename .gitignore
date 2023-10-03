@@ -4,7 +4,7 @@ TelegramMediaArchiverBot.sln
 .vs
 
 # Users media data.
-Uploads
+Data
 
 # Python cache.
 __pycache__
