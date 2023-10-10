@@ -1,5 +1,5 @@
 # Telegram Media Archiver Bot
-**Telegram Media Archiver Bot** – это бот [Telegram](https://telegram.org) для автоматической архивации медиа-вложений из ваших сообщений. С его помощью вы легко сможете скачать сотни изображений одним нажатием кнопки.
+**Telegram Media Archiver Bot** – это бот [Telegram](https://telegram.org) для автоматической архивации медиа-вложений из ваших сообщений. С его помощью вы легко сможете скачать сотни файлов одним нажатием кнопки.
 
 ## Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
@@ -22,5 +22,15 @@ pip install -r requirements.txt
 "token": ""
 ```
 Сюда необходимо занести токен бота Telegram (можно получить у [BotFather](https://t.me/BotFather)).
+
+# Добавление команд 
+
+Можно указать в настройках бота в [BotFather](https://t.me/BotFather).
+
+start - Start working.
+
+statistics - Send file statistics.
+
+archive - Archive files and send it.
 
 _Copyright © Kostevich Irina. 2023._
