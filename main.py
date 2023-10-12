@@ -4,6 +4,8 @@ from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJ
 from Source.UserData import UserData
 from Source.Functions import *
 from telebot import types
+from Source.Sizes import *
+
 
 import telebot
 
@@ -67,7 +69,7 @@ def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id)
+    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizeDirectory)
 
 # Обработчик фото, видео, аудио, документов.
 @Bot.message_handler(content_types=["photo", "video", "audio", "document"])
@@ -94,7 +96,7 @@ def ProcessFileUpload(Message: types.Message):
         FileID = Message.document.file_id
 
     # Загрузка файла.
-    DownloadFile(Bot, Settings, FileID, UserDataObject.getUserID())
+    DownloadFile(Bot, Settings, FileID, UserDataObject.getUserID(), Message, SizeDirectory)
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

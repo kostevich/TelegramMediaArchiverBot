@@ -1,6 +1,6 @@
 from dublib.Methods import RemoveFolderContent
 from telebot import types
-from .Sizes import *
+
 
 import datetime
 import requests
@@ -22,32 +22,48 @@ def CreateKeyboard(TextList: list[str], CallbackList: list[str]) -> types.Inline
     return Keyboard
 
 # Загружает файл.
-def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message) -> bool:
+def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message, SizeDirectory) -> bool:
+    # Создание пустого списка для сохранения размера коллекции.
+    SizeList = list()
+    # Список единиц измерения размера файлов. 
+    Suffixes = ['B', 'KB', 'MB']
+    # Размер папки пользователя.
+    Size = SizeDirectory(f'Data/Files/{UserID}')
+    # Размер папки пользователя в виде строки.
+    StrSize = str(Size)
+    # Разбитие строки.
+    Split = StrSize.split(" ")
+    # Добавление значений в список.
+    for i in Split:
+        SizeList.append(i)
+    # Если единицы измерения папки, меньше 'GB'.
+    if SizeList[1] in Suffixes:
+        pass
+    # Иначе отправляем сообщение пользователю.
+    else: 
+        Bot.send_message(Message.chat.id, 'Место для хранения ваших коллекций ограничено. Бесплатное коллекционирование заканчивается.')
     # Получение данных файла.
     try:
         FileInfo = Bot.get_file(FileID) 
-        
         # Расширение файла.
         FileType = "." + FileInfo.file_path.split('.')[-1]
-
         # Загрузка файла.
         Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{FileInfo.file_path}")
-
         # Сохранение файла.
         with open(f"Data/Files/{UserID}/" + str(FileID) + FileType, "wb") as FileWriter:
             FileWriter.write(Response.content)
+        
     except: 
         Bot.send_message(Message.chat.id, 'Мы не можем сохранить этот файл.')
         
 
 # Отправляет пользователю статистику медиафайлов.
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirectory):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + UserID)
     Size =  SizeDirectory(f'Data/Files/{UserID}')
-    print(Size)
     # Словарь типов файлов.
     FileTypes = {
         "photo": 0,
