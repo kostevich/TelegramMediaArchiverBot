@@ -1,6 +1,6 @@
 from dublib.Methods import RemoveFolderContent
 from telebot import types
-
+from Source.Sizes import *
 
 import datetime
 import requests
@@ -23,25 +23,8 @@ def CreateKeyboard(TextList: list[str], CallbackList: list[str]) -> types.Inline
 
 # Загружает файл.
 def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message, SizeDirectory) -> bool:
-    # Создание пустого списка для сохранения размера коллекции.
-    SizeList = list()
-    # Список единиц измерения размера файлов. 
-    Suffixes = ['B', 'KB', 'MB']
-    # Размер папки пользователя.
-    Size = SizeDirectory(f'Data/Files/{UserID}')
-    # Размер папки пользователя в виде строки.
-    StrSize = str(Size)
-    # Разбитие строки.
-    Split = StrSize.split(" ")
-    # Добавление значений в список.
-    for i in Split:
-        SizeList.append(i)
-    # Если единицы измерения папки, меньше 'GB'.
-    if SizeList[1] in Suffixes:
-        pass
-    # Иначе отправляем сообщение пользователю.
-    else: 
-        Bot.send_message(Message.chat.id, 'Место для хранения ваших коллекций ограничено. Бесплатное коллекционирование заканчивается.')
+    # Загрузка файла.
+    CheckSize(Bot, Message, UserID)
     # Получение данных файла.
     try:
         FileInfo = Bot.get_file(FileID) 

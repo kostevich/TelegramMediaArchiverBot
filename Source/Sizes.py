@@ -4,6 +4,26 @@ from pathlib import Path
 def SizeDirectory(folder):
     return ByteSize(sum(file.stat().st_size for file in Path(folder).rglob('*')))
 
+def CheckSize(Bot, Message, UserID: str):
+    # Создание пустого списка для сохранения размера коллекции.
+    SizeList = list()
+    # Список единиц измерения размера файлов. 
+    Suffixes = ['B', 'KB', 'MB']
+    # Размер папки пользователя.
+    Size = SizeDirectory(f'Data/Files/{UserID}')
+    # Размер папки пользователя в виде строки.
+    StrSize = str(Size)
+    # Разбитие строки.
+    Split = StrSize.split(" ")
+    # Добавление значений в список.
+    for i in Split:
+        SizeList.append(i)
+    # Если единицы измерения папки, меньше 'GB'.
+    if SizeList[1] in Suffixes:
+        pass
+    # Иначе отправляем сообщение пользователю.
+    else: 
+        Bot.send_message(Message.chat.id, 'Место для хранения ваших коллекций ограничено. Бесплатное коллекционирование заканчивается.')
 
 class ByteSize(int):
 
