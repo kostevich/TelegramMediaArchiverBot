@@ -18,12 +18,11 @@ def CheckSize(Bot, Message, UserID: str):
     # Добавление значений в список.
     for i in Split:
         SizeList.append(i)
-    # Если единицы измерения папки, меньше 'GB'.
-    if SizeList[1] in Suffixes:
-        pass
-    # Иначе отправляем сообщение пользователю.
-    else: 
-        Bot.send_message(Message.chat.id, 'Место для хранения ваших коллекций ограничено. Бесплатное коллекционирование заканчивается.')
+    # Если единицы измерения папки 'GB', 'PB'.
+    if SizeList[1] not in Suffixes:
+        # Бот отправляет сообщение о ограничениях.
+        Bot.send_message(Message.chat.id,
+                          'Место для хранения ваших коллекций ограничено. Коллекционирование скоро завершится.'+ "\n" f'У вас осталось {round((2.00-float(SizeList[0])), 2)} ' + SizeList[1])
 
 class ByteSize(int):
 
