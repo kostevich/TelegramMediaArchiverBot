@@ -3,8 +3,8 @@
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
 from Source.UserData import UserData
 from Source.Functions import *
-from telebot import types
 from Source.Sizes import *
+from telebot import types
 
 
 import telebot
@@ -14,7 +14,7 @@ import telebot
 #==========================================================================================#
 
 # Проверка поддержки используемой версии Python.
-CheckPythonMinimalVersion(3, 10)
+CheckPythonMinimalVersion(3, 11)
 # Создание папок в корневой директории.
 MakeRootDirectories(["Data"])
 

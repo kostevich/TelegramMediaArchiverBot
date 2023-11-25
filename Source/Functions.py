@@ -1,12 +1,13 @@
 from dublib.Methods import RemoveFolderContent
-from telebot import types
 from Source.Sizes import *
+from telebot import types
+
 
 import datetime
-import requests
-import telebot
-import shutil
 import os
+import requests
+import shutil
+import telebot
 
 
 # Создаёт набор кнопок.
@@ -25,6 +26,7 @@ def CreateKeyboard(TextList: list[str], CallbackList: list[str]) -> types.Inline
 def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message, SizeDirectory) -> bool:
     # Загрузка файла.
     CheckSize(Bot, Message, UserID)
+    
     # Получение данных файла.
     try:
         FileInfo = Bot.get_file(FileID) 
@@ -46,7 +48,9 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirec
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + UserID)
+    
     Size =  SizeDirectory(f'Data/Files/{UserID}')
+
     # Словарь типов файлов.
     FileTypes = {
         "photo": 0,
@@ -54,6 +58,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirec
         "document": 0,
         "audio": 0
     }
+
     # Словарь расширений файлов.
     FileExtensions = {
         "photo": ["jpg", "png", "webp", "jpeg", "ico", "gif", "svg"],

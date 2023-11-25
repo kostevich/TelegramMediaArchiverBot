@@ -1,10 +1,6 @@
-# Visual Studio project files.
-TelegramMediaArchiverBot.pyproj
-TelegramMediaArchiverBot.sln
-.vs
-
-# Users media data.
-Data
-
-# Python cache.
+# Program files
+READMEMedia
 __pycache__
+
+# Confidential files
+Data

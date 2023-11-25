@@ -1,14 +1,15 @@
 from pathlib import Path
 
-
+# Возвращает размер папки.
 def SizeDirectory(folder):
     return ByteSize(sum(file.stat().st_size for file in Path(folder).rglob('*')))
 
+# Проверяет наличие места в коллекции.
 def CheckSize(Bot, Message, UserID: str):
     # Создание пустого списка для сохранения размера коллекции.
     SizeList = list()
     # Список единиц измерения размера файлов. 
-    Suffixes = ['B', 'KB', 'MB']
+    Suffixes = ['B', 'KB', 'MB', 'PB' ]
     # Размер папки пользователя.
     Size = SizeDirectory(f'Data/Files/{UserID}')
     # Размер папки пользователя в виде строки.
