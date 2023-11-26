@@ -1,5 +1,9 @@
  #!/usr/bin/python
 
+#==========================================================================================#
+# >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
+#==========================================================================================#
+
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
 from Source.UserData import UserData
 from Source.Functions import *
@@ -15,7 +19,8 @@ import telebot
 
 # Проверка поддержки используемой версии Python.
 CheckPythonMinimalVersion(3, 11)
-# Создание папок в корневой директории.
+
+# Создание папки в корневой директории.
 MakeRootDirectories(["Data"])
 
 #==========================================================================================#
@@ -37,7 +42,12 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "":
 Bot = telebot.TeleBot(Settings["token"])
 
 #==========================================================================================#
-# >>>>> ОБРАБОТКА ЗАПРОСОВ <<<<< #
+# >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
+#==========================================================================================#
+
+
+#==========================================================================================#
+# >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
 #==========================================================================================#
 
 # Обрабатывает команду: archive.
@@ -51,11 +61,16 @@ def ProcessCommandStart(Message: types.Message):
         # Отправить инструкции пользователю.
         Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
 
+#==========================================================================================#
+# >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
+#==========================================================================================#
+    
 # Обрабатывает команду: start.
 @Bot.message_handler(commands=["start"])
 def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
+
     # Отправка приветствия.
     Bot.send_message(
         Message.chat.id,
@@ -63,19 +78,29 @@ def ProcessCommandStart(Message: types.Message):
         parse_mode = "MarkdownV2"
     )
 
+#=========================================================================================#
+# >>>>> ОБРАБОТКА КОМАНДЫ STATISTICS <<<<< #
+#==========================================================================================#
+
 # Обрабатывает команду: statistics.
 @Bot.message_handler(commands=["statistics"])
 def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
+
     # Отправка статистики медиафайлов.
     GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizeDirectory)
+
+#=========================================================================================#
+# >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
+#==========================================================================================#
 
 # Обработчик фото, видео, аудио, документов.
 @Bot.message_handler(content_types=["photo", "video", "audio", "document"])
 def ProcessFileUpload(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
+    
     # ID файла.
     FileID = None
 

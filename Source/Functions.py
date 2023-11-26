@@ -1,3 +1,7 @@
+#==========================================================================================#
+# >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
+#==========================================================================================#
+
 from dublib.Methods import RemoveFolderContent
 from Source.Sizes import *
 from telebot import types
@@ -9,18 +13,9 @@ import requests
 import shutil
 import telebot
 
-
-# Создаёт набор кнопок.
-def CreateKeyboard(TextList: list[str], CallbackList: list[str]) -> types.InlineKeyboardMarkup:
-    # Набор кнопок.
-    Keyboard = types.InlineKeyboardMarkup()
-
-    # Для каждого набора данных.
-    for Index in range(0, len(TextList)):
-        # Создание кнопки.
-        Keyboard.add(types.InlineKeyboardButton(text = TextList[Index], callback_data = CallbackList[Index]))
-
-    return Keyboard
+#==========================================================================================#
+# >>>>> ЗАГРУЗКА МЕДИАФАЙЛОВ <<<<< #
+#==========================================================================================#
 
 # Загружает файл.
 def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message, SizeDirectory) -> bool:
@@ -30,10 +25,13 @@ def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str,
     # Получение данных файла.
     try:
         FileInfo = Bot.get_file(FileID) 
+
         # Расширение файла.
         FileType = "." + FileInfo.file_path.split('.')[-1]
+
         # Загрузка файла.
         Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{FileInfo.file_path}")
+
         # Сохранение файла.
         with open(f"Data/Files/{UserID}/" + str(FileID) + FileType, "wb") as FileWriter:
             FileWriter.write(Response.content)
@@ -41,14 +39,17 @@ def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str,
     except: 
         Bot.send_message(Message.chat.id, 'Мы не можем сохранить этот файл.')
         
+#==========================================================================================#
+# >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
+#==========================================================================================#
 
 # Отправляет пользователю статистику медиафайлов.
 def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirectory):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
+
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + UserID)
-    
     Size =  SizeDirectory(f'Data/Files/{UserID}')
 
     # Словарь типов файлов.
@@ -93,16 +94,23 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirec
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
     MessageText += "❔📦_Размер всех медиафайлов_\: " + str(Size).replace('.','\.')
+
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
+
+#==========================================================================================#
+# >>>>> ОТПРАВКА АРХИВА  <<<<< #
+#==========================================================================================#
 
 # Архивирует файлы пользователя и отправляет в чат.
 def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int) -> bool:
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
+
     # Форматирование названия файла.
     Date = str(Date).replace(':', '-').split('.')[0]
+    
     # Состояние: удалась ли отправка архива.
     IsSended = False
 
@@ -110,8 +118,10 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int) -> bool:
     if len(os.listdir("Data/Files/" + UserID)) > 0:
         # Архивирование файлов пользователя.
         shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
+
         # Очистка файлов пользователя. 
         RemoveFolderContent("Data/Files/" + UserID)
+
         # Бинарное содержимое архива.
         BinaryArchive = None
 
@@ -121,8 +131,10 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int) -> bool:
 
         # Отправка архива пользователю.
         Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+
         # Очистка архивов пользователя. 
         RemoveFolderContent("Data/Archives/" + UserID)
+        
         # Переключение состояния.
         IsSended = True
 
