@@ -11,10 +11,10 @@ pip install pyTelegramBotAPI
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
 ```
-pip install -r Requirements.txt
+pip install -r requirements.txt
 ```
 4. Настроить бота путём редактирования _Settings.json_.
-5. Запустить файл _Main.py_.
+5. Запустить файл _main.py_.
 6. Перейти в чат с ботом, токен которого указан в настройках, и следовать его инструкциям.
 
 # Settings.json
@@ -35,10 +35,16 @@ Archive - archive files and send it.
 
 # Пример работы
 
-![Обработка команды start](photo_2023-10-17_21-21-29.jpg)
+__Обработка команды start__
 
-![Вывод команд](image_2023-10-17_21-17-26-1.png)
+![photo_2023-10-17_21-21-29](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/6451fdcf-2c9c-47d9-9eb9-be94e1f3448f)
 
-![Обработка команды statistics и archive](image-2.png)
+__Вывод команд__
+
+![image_2023-10-17_21-17-26-1](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/8e018e47-fa02-4e67-a56f-4e006c3349f5)
+
+Обработка команды statistics и archive
+
+![image-2](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/ed863b9b-9d90-4f68-923f-9a388d40e695)
 
 _Copyright © Kostevich Irina. 2023._
