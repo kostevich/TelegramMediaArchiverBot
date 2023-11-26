@@ -13,18 +13,20 @@ pip install pyTelegramBotAPI
 ```
 pip install -r requirements.txt
 ```
-4. Настроить бота путём редактирования _Settings.json_.
-5. Запустить файл _main.py_.
-6. Перейти в чат с ботом, токен которого указан в настройках, и следовать его инструкциям.
+4. Настроить бота путём редактирования [_Settings.json_](#Settings).
+5. Можно добавить команды в бота, для удобства работы [(бот будет работать и без этой настройки)](#AddCommands).
+6. Запустить файл _main.py_.
+7. Перейти в чат с ботом, токен которого указан в настройках, и следовать его инструкциям.
 
 # Settings.json
+<a name="Settings"></a> 
 ```JSON
 "token": ""
 ```
 Сюда необходимо занести токен бота Telegram (можно получить у [BotFather](https://t.me/BotFather)).
 
 # Добавление команд 
-
+<a name="AddCommands"></a> 
 Можно указать в настройках бота в [BotFather](https://t.me/BotFather).
 
 Start - start working.
@@ -34,16 +36,15 @@ Statistics - send file statistics.
 Archive - archive files and send it.
 
 # Пример работы
-
-__Обработка команды start__
+**Обработка команды start:**
 
 ![photo_2023-10-17_21-21-29](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/6451fdcf-2c9c-47d9-9eb9-be94e1f3448f)
 
-__Вывод команд__
+**Вывод команд:**
 
 ![image_2023-10-17_21-17-26-1](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/8e018e47-fa02-4e67-a56f-4e006c3349f5)
 
-Обработка команды statistics и archive
+**Обработка команды statistics и archive:**
 
 ![image-2](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/ed863b9b-9d90-4f68-923f-9a388d40e695)
 
