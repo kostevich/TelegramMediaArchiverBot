@@ -18,15 +18,15 @@ pip install -r requirements.txt
 6. Запустить файл _main.py_.
 7. Перейти в чат с ботом, токен которого указан в настройках, и следовать его инструкциям.
 
-# Settings.json
 <a name="Settings"></a> 
+# Settings.json
 ```JSON
 "token": ""
 ```
 Сюда необходимо занести токен бота Telegram (можно получить у [BotFather](https://t.me/BotFather)).
 
-# Добавление команд 
 <a name="AddCommands"></a> 
+# Добавление команд 
 Можно указать в настройках бота в [BotFather](https://t.me/BotFather).
 
 Start - start working.
