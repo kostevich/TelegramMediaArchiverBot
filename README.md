@@ -4,7 +4,7 @@
 # Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
 2. Установить [Python](https://www.python.org/downloads/) версии не старше 3.11. Рекомендуется добавить в PATH.
-3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI).
+3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI) не старше 4.14.0.
 ```
 pip install git+https://github.com/DUB1401/dublib#egg=dublib
 pip install pyTelegramBotAPI
