@@ -5,9 +5,9 @@
 #==========================================================================================#
 
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
-from Source.UserData import UserData
 from Source.Functions import *
 from Source.Sizes import *
+from Source.UserData import UserData
 from telebot import types
 
 
