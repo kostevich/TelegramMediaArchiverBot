@@ -2,7 +2,7 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import RemoveFolderContent
+from dublib.Methods import RemoveFolderContent, WriteJSON
 from Source.Sizes import *
 from telebot import types
 
@@ -13,31 +13,36 @@ import requests
 import shutil
 import telebot
 
+
+#==========================================================================================#
+# >>>>> СОЗДАНИЕ ОЧЕРЕДИ МЕДИАФАЙЛОВ <<<<< #
+#==========================================================================================#
+
+
+
 #==========================================================================================#
 # >>>>> ЗАГРУЗКА МЕДИАФАЙЛОВ <<<<< #
 #==========================================================================================#
 
 # Загружает файл.
-def DownloadFile(Bot: telebot.TeleBot, Settings: dict, FileID: int, UserID: str, Message, SizeDirectory) -> bool:
-    # Загрузка файла.
-    CheckSize(Bot, Message, UserID)
-    
+def DownloadFile(MessagesBufer):
+    # CheckSize(Bot, Message, UserID)
     # Получение данных файла.
     try:
-        FileInfo = Bot.get_file(FileID) 
-
         # Расширение файла.
-        FileType = "." + FileInfo.file_path.split('.')[-1]
+        FileType = "." + MessagesBufer[0].file_path.split('.')[-1]
+        print(FileType)
 
         # Загрузка файла.
-        Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{FileInfo.file_path}")
+        Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{ MessagesBufer[0].file_path}")
+        print(Response)
 
         # Сохранение файла.
         with open(f"Data/Files/{UserID}/" + str(FileID) + FileType, "wb") as FileWriter:
             FileWriter.write(Response.content)
         
     except: 
-        Bot.send_message(Message.chat.id, 'Мы не можем сохранить этот файл.')
+        print(0)
         
 #==========================================================================================#
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
@@ -50,7 +55,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirec
 
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + UserID)
-    Size =  SizeDirectory(f'Data/Files/{UserID}')
+    Size =  SizeDirectory(f'Data/Files/{UserID}')                                                                          
 
     # Словарь типов файлов.
     FileTypes = {

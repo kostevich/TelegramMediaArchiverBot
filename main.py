@@ -9,6 +9,7 @@ from Source.Functions import *
 from Source.Sizes import *
 from Source.UserData import UserData
 from telebot import types
+from threading import Thread
 
 
 import telebot
@@ -40,6 +41,33 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "":
 
 # Токен для работы определенного бота телегамм.
 Bot = telebot.TeleBot(Settings["token"])
+
+class Order:
+    # Конструктор: задаёт глобальные настройки, обработчик конфигураций и менеджер подключений к ботам.
+    def __init__(self):
+        # Поток загрузки файла.
+        self.__Download = Thread(target = self.__SenderThread, name = "Отправка сообщений")
+        # Очередь отложенных сообщений.
+        self.__MessagesBufer = list()
+        self.__Download.start()
+          
+    def AddFileID(self, FileID):
+        self.FileInfo = Bot.get_file(FileID) 
+        self.__MessagesBufer.append(self.FileInfo)
+    
+
+    # Обрабатывает очередь сообщений.
+    def __SenderThread(self):
+        # Запись в лог отладочной информации: поток очереди отправки запущен.
+        print("Поток запущен.")
+        
+        # Пока сообщение не отправлено.
+        while True:
+            # Если в очереди на отправку есть сообщения.
+            if len(self.__MessagesBufer) > 0:
+                DownloadFile(self.__MessagesBufer, Settings)
+
+r = Order()    
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
@@ -120,8 +148,9 @@ def ProcessFileUpload(Message: types.Message):
     elif Message.content_type == "document":
         FileID = Message.document.file_id
 
-    # Загрузка файла.
-    DownloadFile(Bot, Settings, FileID, UserDataObject.getUserID(), Message, SizeDirectory)
+    # Добавление файла в очередь.
+    r.AddFileID(FileID)
+    
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)
