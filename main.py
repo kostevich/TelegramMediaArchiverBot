@@ -12,6 +12,7 @@ from telebot import types
 from threading import Thread
 
 
+import logging
 import telebot
 
 #==========================================================================================#
@@ -22,7 +23,7 @@ import telebot
 CheckPythonMinimalVersion(3, 11)
 
 # Создание папки в корневой директории.
-MakeRootDirectories(["Data"])
+MakeRootDirectories(["Data/Files", "Data/Archives", "Data/Users"])
 
 #==========================================================================================#
 # >>>>> ЧТЕНИЕ НАСТРОЕК <<<<< #
@@ -36,6 +37,12 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "":
     raise Exception("Invalid Telegram bot token.")
 
 #==========================================================================================#
+# >>>>> НАСТРОЙКА ЛОГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+logging.basicConfig(level=logging.INFO, filename="LOGING.log", filemode="w")
+
+#==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ БОТА <<<<< #
 #==========================================================================================#
 
@@ -44,30 +51,32 @@ Bot = telebot.TeleBot(Settings["token"])
 
 class Order:
     # Конструктор: задаёт глобальные настройки, обработчик конфигураций и менеджер подключений к ботам.
-    def __init__(self):
+    def __init__(self, Settings):
         # Поток загрузки файла.
         self.__Download = Thread(target = self.__SenderThread, name = "Отправка сообщений")
         # Очередь отложенных сообщений.
         self.__MessagesBufer = list()
         self.__Download.start()
+        self.Settings = Settings
           
-    def AddFileID(self, FileID):
-        self.FileInfo = Bot.get_file(FileID) 
-        self.__MessagesBufer.append(self.FileInfo)
-    
+    def AddFileInfo(self, FileInfo, UserDataObject):
+        self.__MessagesBufer.append(FileInfo)
+        self.UserDataObject = UserDataObject
 
     # Обрабатывает очередь сообщений.
     def __SenderThread(self):
-        # Запись в лог отладочной информации: поток очереди отправки запущен.
-        print("Поток запущен.")
+        # Вывод информации о запуске процесса.
+        logging.info("Поток запущен.")
         
         # Пока сообщение не отправлено.
         while True:
             # Если в очереди на отправку есть сообщения.
             if len(self.__MessagesBufer) > 0:
-                DownloadFile(self.__MessagesBufer, Settings)
+                DownloadFile(self.__MessagesBufer, Settings, self.UserDataObject)
+                logging.info("Загрузка файлов.")
+        
 
-r = Order()    
+OrderObject = Order(Settings)    
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
@@ -117,7 +126,7 @@ def ProcessCommandStart(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizeDirectory)
+    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -131,6 +140,7 @@ def ProcessFileUpload(Message: types.Message):
     
     # ID файла.
     FileID = None
+
 
     # Если тип файла – фото.
     if Message.content_type == "photo":
@@ -147,10 +157,14 @@ def ProcessFileUpload(Message: types.Message):
     # Если тип файла – фото.
     elif Message.content_type == "document":
         FileID = Message.document.file_id
-
-    # Добавление файла в очередь.
-    r.AddFileID(FileID)
     
+    FileInfo = Bot.get_file(FileID) 
+    
+    if SizeObject.CheckSize(FileInfo) == True:
+        # Добавление файла в очередь.
+        OrderObject.AddFileInfo(FileInfo, UserDataObject)
+        logging.info("Добавление файла в очередь.")
+
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

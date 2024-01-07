@@ -3,9 +3,9 @@
 #==========================================================================================#
 
 from dublib.Methods import ReadJSON, WriteJSON
-from telebot import types
 
 
+import logging
 import os
 
 #==========================================================================================#
@@ -19,8 +19,8 @@ class UserData:
 	def __CreateUser(self):
 		# Создание экземпляра пользователя.
 		self.__User = {
-			"chat-id": None,
-			"premium": False
+			"Size": 0,
+			"Premium": False
 		}
 
 		# Создание папки файлов пользователя.
@@ -70,3 +70,13 @@ class UserData:
 	def save(self):
 		# Сохранение файла пользователя.
 		WriteJSON("Data/Users/" + self.__UserID + ".json", self.__User)
+
+	def __UpdateSizeUser(self, UpdatingSize):
+		logging.info("Мы в функции.")
+		self.__User = {
+			"Size": UpdatingSize,
+			"Premium": False
+		}
+		# Сохранение файла пользователя.
+		self.save()
+		return self.__User

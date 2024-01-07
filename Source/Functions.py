@@ -1,46 +1,41 @@
+
 #==========================================================================================#
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import RemoveFolderContent, WriteJSON
-from Source.Sizes import *
-from telebot import types
+from dublib.Methods import RemoveFolderContent, ReadJSON
 
-
+import logging
 import datetime
 import os
 import requests
 import shutil
 import telebot
 
-
 #==========================================================================================#
-# >>>>> СОЗДАНИЕ ОЧЕРЕДИ МЕДИАФАЙЛОВ <<<<< #
-#==========================================================================================#
-
-
-
-#==========================================================================================#
-# >>>>> ЗАГРУЗКА МЕДИАФАЙЛОВ <<<<< #
+# >>>>> ЗАГРУЗКА ОЧЕРЕДИ ИЗ МЕДИАФАЙЛОВ <<<<< #
 #==========================================================================================#
 
 # Загружает файл.
-def DownloadFile(MessagesBufer):
-    # CheckSize(Bot, Message, UserID)
+def DownloadFile(MessagesBufer, Settings, UserDataObject):
     # Получение данных файла.
     try:
         # Расширение файла.
         FileType = "." + MessagesBufer[0].file_path.split('.')[-1]
-        print(FileType)
 
         # Загрузка файла.
         Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{ MessagesBufer[0].file_path}")
-        print(Response)
-
-        # Сохранение файла.
-        with open(f"Data/Files/{UserID}/" + str(FileID) + FileType, "wb") as FileWriter:
-            FileWriter.write(Response.content)
         
+        # Сохранение файла.
+        with open(f"Data/Files/{UserDataObject.getUserID()}/" + str(MessagesBufer[0].file_unique_id) + FileType, "wb") as FileWriter:
+            FileWriter.write(Response.content)
+            UpdatingSize = (ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]) + MessagesBufer[0].file_size/1024
+            logging.info(f"Файл загружен: {UpdatingSize}.")
+            UserDataObject.__UpdateSizeUser(UpdatingSize)
+            logging.info("Переданы данные файлов.")
+            # Удаление элемента из списка.
+            MessagesBufer.remove(MessagesBufer[0])
+            
     except: 
         print(0)
         
