@@ -40,7 +40,9 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "":
 # >>>>> НАСТРОЙКА ЛОГИРОВАНИЯ <<<<< #
 #==========================================================================================#
 
-logging.basicConfig(level=logging.INFO, filename="LOGING.log", filemode="w")
+logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log", filemode="w",
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ БОТА <<<<< #
@@ -51,37 +53,47 @@ Bot = telebot.TeleBot(Settings["token"])
 
 class Order:
     # Конструктор: задаёт глобальные настройки, обработчик конфигураций и менеджер подключений к ботам.
-    def __init__(self, Settings):
+    def __init__(self, Settings: dict):
         # Поток загрузки файла.
         self.__Download = Thread(target = self.__SenderThread, name = "Отправка сообщений")
+
         # Очередь отложенных сообщений.
         self.__MessagesBufer = list()
+
+        # Запуск очереди.
         self.__Download.start()
+
+        # Настройки бота.
         self.Settings = Settings
           
-    def AddFileInfo(self, FileInfo, UserDataObject):
+    def AddFileInfo(self, FileInfo: any, UserDataObject: UserData):
+        # Добавление файла в список.
         self.__MessagesBufer.append(FileInfo)
+
+        # Создание объекта класса.
         self.UserDataObject = UserDataObject
 
     # Обрабатывает очередь сообщений.
     def __SenderThread(self):
-        # Вывод информации о запуске процесса.
+        # Логгирование.
         logging.info("Поток запущен.")
         
         # Пока сообщение не отправлено.
         while True:
             # Если в очереди на отправку есть сообщения.
             if len(self.__MessagesBufer) > 0:
+                # Скачиваем файл.
                 DownloadFile(self.__MessagesBufer, Settings, self.UserDataObject)
+
+                # Логгирование.
                 logging.info("Загрузка файлов.")
         
-
+# Создание объекта класса.
 OrderObject = Order(Settings)    
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
 #==========================================================================================#
-
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
@@ -126,7 +138,7 @@ def ProcessCommandStart(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id)
+    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, UserDataObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -140,7 +152,6 @@ def ProcessFileUpload(Message: types.Message):
     
     # ID файла.
     FileID = None
-
 
     # Если тип файла – фото.
     if Message.content_type == "photo":
@@ -158,12 +169,34 @@ def ProcessFileUpload(Message: types.Message):
     elif Message.content_type == "document":
         FileID = Message.document.file_id
     
+    # Получение данных файла.
     FileInfo = Bot.get_file(FileID) 
     
+    # Если размер файла меньше 20 MB.
     if SizeObject.CheckSize(FileInfo) == True:
-        # Добавление файла в очередь.
-        OrderObject.AddFileInfo(FileInfo, UserDataObject)
-        logging.info("Добавление файла в очередь.")
+        # Если размер всех скачанных файлов меньше 20 MB.
+        if ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]< 20480:
+            # Добавление файла в очередь.
+            OrderObject.AddFileInfo(FileInfo, UserDataObject)
+            
+            # Логгирование.
+            logging.info("Добавление файла в очередь.")
+
+        # Посылаем сообщение.    
+        else:
+            Bot.send_message(
+        Message.chat.id,
+        "Вы привысили лимит скачиваний файлов\. Обратитесь в поддержку\.",
+        parse_mode = "MarkdownV2"
+    )
+            
+    # Посылаем сообщение. 
+    else: 
+        Bot.send_message(
+        Message.chat.id,
+        "Пока файлы размером больше 20 мб недоступны для скачивания\. Такая функция будет доступна в скором времени\.",
+        parse_mode = "MarkdownV2"
+    )
 
 
 # Запуск обработки запросов Telegram.

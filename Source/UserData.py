@@ -71,12 +71,12 @@ class UserData:
 		# Сохранение файла пользователя.
 		WriteJSON("Data/Users/" + self.__UserID + ".json", self.__User)
 
-	def __UpdateSizeUser(self, UpdatingSize):
-		logging.info("Мы в функции.")
+	def __UpdateSizeUser(self, UpdatingSize: int) -> dict:
 		self.__User = {
 			"Size": UpdatingSize,
 			"Premium": False
 		}
 		# Сохранение файла пользователя.
 		self.save()
+		logging.info(f"Размер скачанных файлов: {UpdatingSize} добавлен в JSON.")
 		return self.__User

@@ -5,19 +5,20 @@
 
 from dublib.Methods import RemoveFolderContent, ReadJSON
 
-import logging
+
 import datetime
+import logging
 import os
 import requests
 import shutil
 import telebot
 
 #==========================================================================================#
-# >>>>> ЗАГРУЗКА ОЧЕРЕДИ ИЗ МЕДИАФАЙЛОВ <<<<< #
+# >>>>> ЗАГРУЗКА МЕДИАФАЙЛОВ <<<<< #
 #==========================================================================================#
 
-# Загружает файл.
-def DownloadFile(MessagesBufer, Settings, UserDataObject):
+# Загружает файлы.
+def DownloadFile(MessagesBufer: list, Settings: dict, UserDataObject: any):
     # Получение данных файла.
     try:
         # Расширение файла.
@@ -29,28 +30,37 @@ def DownloadFile(MessagesBufer, Settings, UserDataObject):
         # Сохранение файла.
         with open(f"Data/Files/{UserDataObject.getUserID()}/" + str(MessagesBufer[0].file_unique_id) + FileType, "wb") as FileWriter:
             FileWriter.write(Response.content)
+
+            # Размер всех скачанных файлов.
             UpdatingSize = (ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]) + MessagesBufer[0].file_size/1024
-            logging.info(f"Файл загружен: {UpdatingSize}.")
-            UserDataObject.__UpdateSizeUser(UpdatingSize)
-            logging.info("Переданы данные файлов.")
+
+            # Запись в json.
+            UserDataObject._UserData__UpdateSizeUser(UpdatingSize)
+
             # Удаление элемента из списка.
             MessagesBufer.remove(MessagesBufer[0])
-            
+
+            # Логгирование.
+            logging.info("Удаление файла из очереди.")   
+             
     except: 
-        print(0)
+        # Логгирование.
+        logging.error("Не получилось загрузить файл.")
         
 #==========================================================================================#
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
 # Отправляет пользователю статистику медиафайлов.
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirectory):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
 
     # Список названий файлов в директории пользователя.
-    Files = os.listdir("Data/Files/" + UserID)
-    Size =  SizeDirectory(f'Data/Files/{UserID}')                                                                          
+    Files = os.listdir("Data/Files/" + str(UserID))
+
+    # Размер всех скачанных файлов.
+    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")                                                                   
 
     # Словарь типов файлов.
     FileTypes = {
@@ -93,7 +103,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeDirec
     MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
-    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(Size).replace('.','\.')
+    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(Size["Size"]).replace('.','\.')
 
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
