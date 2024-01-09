@@ -138,7 +138,7 @@ def ProcessCommandStart(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, UserDataObject)
+    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizeObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #

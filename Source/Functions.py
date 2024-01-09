@@ -52,7 +52,7 @@ def DownloadFile(MessagesBufer: list, Settings: dict, UserDataObject: any):
 #==========================================================================================#
 
 # Отправляет пользователю статистику медиафайлов.
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
 
@@ -60,7 +60,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int):
     Files = os.listdir("Data/Files/" + str(UserID))
 
     # Размер всех скачанных файлов.
-    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")                                                                   
+    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")                                                               
 
     # Словарь типов файлов.
     FileTypes = {
@@ -103,7 +103,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int):
     MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
-    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(Size["Size"]).replace('.','\.')
+    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(SizeObject.Converter(int(Size["Size"]))).replace('.','\.')
 
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
