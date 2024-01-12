@@ -7,45 +7,10 @@ from dublib.Methods import RemoveFolderContent, ReadJSON
 
 
 import datetime
-import logging
 import os
-import requests
 import shutil
 import telebot
 
-#==========================================================================================#
-# >>>>> ЗАГРУЗКА МЕДИАФАЙЛОВ <<<<< #
-#==========================================================================================#
-
-# Загружает файлы.
-def DownloadFile(MessagesBufer: list, Settings: dict, UserDataObject: any):
-    # Получение данных файла.
-    try:
-        # Расширение файла.
-        FileType = "." + MessagesBufer[0].file_path.split('.')[-1]
-
-        # Загрузка файла.
-        Response = requests.get("https://api.telegram.org/file/bot" + Settings["token"] + f"/{ MessagesBufer[0].file_path}")
-        
-        # Сохранение файла.
-        with open(f"Data/Files/{UserDataObject.getUserID()}/" + str(MessagesBufer[0].file_unique_id) + FileType, "wb") as FileWriter:
-            FileWriter.write(Response.content)
-
-            # Размер всех скачанных файлов.
-            UpdatingSize = (ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]) + MessagesBufer[0].file_size/1024
-
-            # Запись в json.
-            UserDataObject._UserData__UpdateSizeUser(UpdatingSize)
-
-            # Удаление элемента из списка.
-            MessagesBufer.remove(MessagesBufer[0])
-
-            # Логгирование.
-            logging.info("Удаление файла из очереди.")   
-             
-    except: 
-        # Логгирование.
-        logging.error("Не получилось загрузить файл.")
         
 #==========================================================================================#
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
@@ -113,7 +78,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 #==========================================================================================#
 
 # Архивирует файлы пользователя и отправляет в чат.
-def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int) -> bool:
+def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any) -> bool:
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
@@ -125,28 +90,31 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int) -> bool:
     IsSended = False
 
     # Если существуют файлы для архивации.
-    if len(os.listdir("Data/Files/" + UserID)) > 0:
-        # Архивирование файлов пользователя.
-        shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
+    while len(os.listdir("Data/Files/" + UserID)) > 0:
+        if len(FlowObject._Flow__MessagesBufer) <= 0:
+            # Архивирование файлов пользователя.
+            shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
 
-        # Очистка файлов пользователя. 
-        RemoveFolderContent("Data/Files/" + UserID)
+            # Очистка файлов пользователя. 
+            RemoveFolderContent("Data/Files/" + UserID)
 
-        # Бинарное содержимое архива.
-        BinaryArchive = None
+            # Бинарное содержимое архива.
+            BinaryArchive = None
 
-        # Чтение архива.
-        with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
-            BinaryArchive = FileReader.read()
+            # Чтение архива.
+            with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
+                BinaryArchive = FileReader.read()
 
-        # Отправка архива пользователю.
-        Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+            # Отправка архива пользователю.
+            Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
 
-        # Очистка архивов пользователя. 
-        RemoveFolderContent("Data/Archives/" + UserID)
-        
-        # Переключение состояния.
-        IsSended = True
+            # Очистка архивов пользователя. 
+            RemoveFolderContent("Data/Archives/" + UserID)
+            
+            # Переключение состояния.
+            IsSended = True
+        else:
+            Bot.send_message(ChatID, "❗ Не все ваши файлы сейчас находятся в архиве. Подождите...")
 
     return IsSended
 

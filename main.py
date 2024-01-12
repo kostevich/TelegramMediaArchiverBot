@@ -5,11 +5,11 @@
 #==========================================================================================#
 
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
+from Source.Flow import Flow
 from Source.Functions import *
 from Source.Sizes import *
 from Source.UserData import UserData
 from telebot import types
-from threading import Thread
 
 
 import logging
@@ -51,45 +51,8 @@ logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log",
 # Токен для работы определенного бота телегамм.
 Bot = telebot.TeleBot(Settings["token"])
 
-class Order:
-    # Конструктор: задаёт глобальные настройки, обработчик конфигураций и менеджер подключений к ботам.
-    def __init__(self, Settings: dict):
-        # Поток загрузки файла.
-        self.__Download = Thread(target = self.__SenderThread, name = "Отправка сообщений")
-
-        # Очередь отложенных сообщений.
-        self.__MessagesBufer = list()
-
-        # Запуск очереди.
-        self.__Download.start()
-
-        # Настройки бота.
-        self.Settings = Settings
-          
-    def AddFileInfo(self, FileInfo: any, UserDataObject: UserData):
-        # Добавление файла в список.
-        self.__MessagesBufer.append(FileInfo)
-
-        # Создание объекта класса.
-        self.UserDataObject = UserDataObject
-
-    # Обрабатывает очередь сообщений.
-    def __SenderThread(self):
-        # Логгирование.
-        logging.info("Поток запущен.")
-        
-        # Пока сообщение не отправлено.
-        while True:
-            # Если в очереди на отправку есть сообщения.
-            if len(self.__MessagesBufer) > 0:
-                # Скачиваем файл.
-                DownloadFile(self.__MessagesBufer, Settings, self.UserDataObject)
-
-                # Логгирование.
-                logging.info("Загрузка файлов.")
-        
-# Создание объекта класса.
-OrderObject = Order(Settings)    
+# Создание экземпляра класса Flow.
+FlowObject = Flow()   
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
@@ -106,7 +69,7 @@ def ProcessCommandStart(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Если не удалась отправка архива.
-    if SendArchive(Bot, UserDataObject.getUserID(), Message.chat.id) == False:
+    if SendArchive(Bot, UserDataObject.getUserID(), Message.chat.id, FlowObject) == False:
         # Отправить инструкции пользователю.
         Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
 
@@ -177,10 +140,8 @@ def ProcessFileUpload(Message: types.Message):
         # Если размер всех скачанных файлов меньше 20 MB.
         if ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]< 20480:
             # Добавление файла в очередь.
-            OrderObject.AddFileInfo(FileInfo, UserDataObject)
+            FlowObject.AddFileInfo(FileInfo, UserDataObject, Settings)
             
-            # Логгирование.
-            logging.info("Добавление файла в очередь.")
 
         # Посылаем сообщение.    
         else:
