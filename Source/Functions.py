@@ -16,7 +16,6 @@ import telebot
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
-# Отправляет пользователю статистику медиафайлов.
 def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
@@ -77,7 +76,6 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
-# Архивирует файлы пользователя и отправляет в чат.
 def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any) -> bool:
 
     # Получение текущей даты.
@@ -113,6 +111,7 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
             
             # Переключение состояния.
             IsSended = True
+            
         else:
             Bot.send_message(ChatID, "❗ Не все ваши файлы сейчас находятся в архиве. Подождите...")
 

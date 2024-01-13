@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 
 #==========================================================================================#
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
@@ -7,7 +7,7 @@
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
 from Source.Flow import Flow
 from Source.Functions import *
-from Source.Sizes import *
+from Source.Sizes import Size
 from Source.UserData import UserData
 from telebot import types
 
@@ -51,18 +51,20 @@ logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log",
 # Токен для работы определенного бота телегамм.
 Bot = telebot.TeleBot(Settings["token"])
 
-# Создание экземпляра класса Flow.
-FlowObject = Flow()   
+#==========================================================================================#
+# >>>>> СОЗДАНИЕ ЭКЗЕМПЛЯРОВ КЛАССА <<<<< #
+#==========================================================================================#
 
-#==========================================================================================#
-# >>>>> ОБРАБОТКА КОМАНД: ARCHIVE, START, STATISTICS <<<<< #
-#==========================================================================================#
+# Создание экземпляра класса Flow.
+FlowObject = Flow()
+
+# Создание экземпляра класса Size.
+SizeObject = Size()
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
 #==========================================================================================#
 
-# Обрабатывает команду: archive.
 @Bot.message_handler(commands=["archive"])
 def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
@@ -76,8 +78,7 @@ def ProcessCommandStart(Message: types.Message):
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
 #==========================================================================================#
-    
-# Обрабатывает команду: start.
+
 @Bot.message_handler(commands=["start"])
 def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
@@ -94,7 +95,6 @@ def ProcessCommandStart(Message: types.Message):
 # >>>>> ОБРАБОТКА КОМАНДЫ STATISTICS <<<<< #
 #==========================================================================================#
 
-# Обрабатывает команду: statistics.
 @Bot.message_handler(commands=["statistics"])
 def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
@@ -107,7 +107,6 @@ def ProcessCommandStart(Message: types.Message):
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
 #==========================================================================================#
 
-# Обработчик фото, видео, аудио, документов.
 @Bot.message_handler(content_types=["photo", "video", "audio", "document"])
 def ProcessFileUpload(Message: types.Message):
     # Запрос данных пользователя.
