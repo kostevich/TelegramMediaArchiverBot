@@ -7,7 +7,7 @@
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
 from Source.Flow import Flow
 from Source.Functions import *
-from Source.Sizes import Size
+from Source.Size import Size
 from Source.UserData import UserData
 from telebot import types
 
