@@ -70,10 +70,15 @@ def ProcessCommandStart(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
 
-    # Если не удалась отправка архива.
-    if SendArchive(Bot, UserDataObject.getUserID(), Message.chat.id, FlowObject) == False:
+    if FlowObject.CheckEmptyThread == True:
+        # Если не удалась отправка архива.
+        if SendArchive(Bot, UserDataObject.getUserID(), Message.chat.id, FlowObject) == False:
+            # Отправить инструкции пользователю.
+            Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
+    
+    else:
         # Отправить инструкции пользователю.
-        Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
+        Bot.send_message(Message.chat.id, "❗️ Не все ваши файлы сейчас находятся в архиве. Подождите...")
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
@@ -132,8 +137,8 @@ def ProcessFileUpload(Message: types.Message):
         FileID = Message.document.file_id
     
     # Получение данных файла.
-    FileInfo = Bot.get_file(FileID) 
-    
+    FileInfo = Bot.get_file(FileID)
+
     # Если размер файла меньше 20 MB.
     if SizeObject.CheckSize(FileInfo) == True:
         # Если размер всех скачанных файлов меньше 20 MB.
@@ -156,8 +161,7 @@ def ProcessFileUpload(Message: types.Message):
         Message.chat.id,
         "Пока файлы размером больше 20 мб недоступны для скачивания\. Такая функция будет доступна в скором времени\.",
         parse_mode = "MarkdownV2"
-    )
-
+)
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

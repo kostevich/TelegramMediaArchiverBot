@@ -22,7 +22,8 @@ class UserData:
 		# Создание экземпляра пользователя.
 		self.__User = {
 			"Size": 0,
-			"Premium": False
+			"Premium": False, 
+			"FilesNotSave": 0
 		}
 
 		# Создание папки файлов пользователя.
@@ -86,12 +87,15 @@ class UserData:
 	# >>>>> ОБНОВЛЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ <<<<< #
 	#==========================================================================================#
 
-	def __UpdateSizeUser(self, UpdatingSize: int) -> dict:
+	def __UpdateSizeUser(self, UpdatingSize: int, Premium: bool, FilesNotSave: list) -> dict:
 		self.__User = {
 			"Size": UpdatingSize,
-			"Premium": False
+			"Premium": Premium, 
+			"FilesNotSave": FilesNotSave
 		}
+
 		# Сохранение файла пользователя.
 		self.save()
+
 		logging.info(f"Размер скачанных файлов: {UpdatingSize} добавлен в JSON.")
 		return self.__User

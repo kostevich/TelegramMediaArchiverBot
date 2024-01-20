@@ -30,6 +30,9 @@ class Flow:
         # Запуск очереди.
         self.__Download.start()
 
+        # Состояния очереди.
+        self.CheckEmptyThread = str()
+
     #==========================================================================================#
     # >>>>> ОБРАБОТКА ПОТОКОВЫХ ДАННЫХ <<<<< #
     #==========================================================================================#
@@ -40,10 +43,17 @@ class Flow:
         
         # Пока сообщение не отправлено.
         while True:
-            # Если в очереди на отправку есть сообщения.
+            # Если в очереди на загрузке есть медиафайлы.
             if len(self.__MessagesBufer) > 0:
+                # Сохранение состояния очереди.
+                self.CheckEmptyThread = False
+
                 # Скачиваем файл.
                 self.DownloadFile(self.__MessagesBufer)
+
+            else: 
+                # Сохранение состояния очереди.
+                self.CheckEmptyThread = True
 
     #==========================================================================================#
     # >>>>> ДОБАВЛЕНИЕ ФАЙЛА В ОЧЕРЕДЬ МЕДИАФАЙЛОВ <<<<< #
@@ -73,10 +83,10 @@ class Flow:
                 FileWriter.write(Response.content)
 
                 # Размер всех скачанных файлов.
-                UpdatingSize = (ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Size"]) + MessagesBufer[0].file_size/1024
+                UpdatingSize = ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Size"] + MessagesBufer[0].file_size/1024
 
                 # Запись в json.
-                self.UserDataObject._UserData__UpdateSizeUser(UpdatingSize)
+                self.UserDataObject._UserData__UpdateSizeUser(UpdatingSize, ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Premium"], ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Premium"] )
 
                 # Удаление элемента из списка.
                 MessagesBufer.remove(MessagesBufer[0])  
