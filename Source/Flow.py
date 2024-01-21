@@ -5,6 +5,7 @@
 
 from dublib.Methods import ReadJSON
 from threading import Thread
+from Source.Functions import VariableFilesNotSave, VariablePremium
 
 
 import logging
@@ -86,8 +87,8 @@ class Flow:
                 UpdatingSize = ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Size"] + MessagesBufer[0].file_size/1024
 
                 # Запись в json.
-                self.UserDataObject._UserData__UpdateSizeUser(UpdatingSize, ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Premium"], ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Premium"] )
-
+                self.UserDataObject._UserData__UpdateSizeUser(UpdatingSize, VariableFilesNotSave(self.UserDataObject), VariablePremium(self.UserDataObject))
+            
                 # Удаление элемента из списка.
                 MessagesBufer.remove(MessagesBufer[0])  
                 

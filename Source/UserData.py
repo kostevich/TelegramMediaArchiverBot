@@ -99,3 +99,17 @@ class UserData:
 
 		logging.info(f"Размер скачанных файлов: {UpdatingSize} добавлен в JSON.")
 		return self.__User
+
+
+	def __UpdateFilesNotSaveUser(self, UpdatingSize: int, Premium: bool, FilesNotSave: list) -> dict:
+		self.__User = {
+			"Size": UpdatingSize,
+			"Premium": Premium, 
+			"FilesNotSave": FilesNotSave
+		}
+
+		# Сохранение файла пользователя.
+		self.save()
+
+		logging.info(f"Размер скачанных файлов: {UpdatingSize} добавлен в JSON.")
+		return self.__User

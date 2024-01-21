@@ -136,32 +136,45 @@ def ProcessFileUpload(Message: types.Message):
     elif Message.content_type == "document":
         FileID = Message.document.file_id
     
-    # Получение данных файла.
-    FileInfo = Bot.get_file(FileID)
+    try:
+        # Получение данных файла.
+        FileInfo = Bot.get_file(FileID)
+        logging.info("Получили FileInfo.")
 
-    # Если размер файла меньше 20 MB.
-    if SizeObject.CheckSize(FileInfo) == True:
-        # Если размер всех скачанных файлов меньше 20 MB.
-        if ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]< 20480:
-            # Добавление файла в очередь.
-            FlowObject.AddFileInfo(FileInfo, UserDataObject, Settings)
-            
+        # Если размер файла меньше 20 MB.
+        if SizeObject.CheckSize(FileInfo) == True:
+            logging.info("Размер файла меньше 20 мб.")
+            # Если размер всех скачанных файлов меньше 20 MB.
+            if ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]< 20480:
+                logging.info("Размер всех скачанных файлов меньше 20 MB")
+                # Добавление файла в очередь.
+                FlowObject.AddFileInfo(FileInfo, UserDataObject, Settings)
+                logging.info("Добавление файла в очередь.")
 
-        # Посылаем сообщение.    
-        else:
+            # Посылаем сообщение.    
+            else:
+                print(FileID)
+                logging.info("1. FileID.")
+                Bot.send_message(
+            Message.chat.id,
+            "Вы привысили лимит скачиваний файлов\. Обратитесь в поддержку\.",
+            parse_mode = "MarkdownV2"
+        )
+                
+        # Посылаем сообщение. 
+        else: 
+            print(FileID)
+            logging.info("2. FileID.")
             Bot.send_message(
-        Message.chat.id,
-        "Вы привысили лимит скачиваний файлов\. Обратитесь в поддержку\.",
-        parse_mode = "MarkdownV2"
+            Message.chat.id,
+            "Пока файлы размером больше 20 мб недоступны для скачивания\. Такая функция будет доступна в скором времени\.",
+            parse_mode = "MarkdownV2"
     )
-            
-    # Посылаем сообщение. 
-    else: 
-        Bot.send_message(
-        Message.chat.id,
-        "Пока файлы размером больше 20 мб недоступны для скачивания\. Такая функция будет доступна в скором времени\.",
-        parse_mode = "MarkdownV2"
-)
+    except: 
+        print(FileID)
+        logging.info("3. FileID.")
+
+
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

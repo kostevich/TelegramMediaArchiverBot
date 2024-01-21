@@ -117,3 +117,15 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
     return IsSended
 
+def VariablePremium(UserDataObject)-> bool:
+    Premium = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Premium"]
+
+    return Premium
+
+
+def VariableFilesNotSave(UserDataObject)-> str:
+    FilesNotSave = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["FilesNotSave"]
+
+    return FilesNotSave
+
+
