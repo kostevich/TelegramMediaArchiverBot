@@ -9,6 +9,7 @@ from Source.Flow import Flow
 from Source.Functions import *
 from Source.Size import Size
 from Source.UserData import UserData
+from Source.Manager import Manager
 from telebot import types
 
 
@@ -60,6 +61,9 @@ FlowObject = Flow()
 
 # Создание экземпляра класса Size.
 SizeObject = Size()
+
+# Создание экземпляра класса Size.
+ManagerObject = Manager()
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
@@ -124,54 +128,51 @@ def ProcessFileUpload(Message: types.Message):
     if Message.content_type == "photo":
         FileID = Message.photo[-1].file_id
 
-    # Если тип файла – фото.
+    # Если тип файла – видео.
     elif Message.content_type == "video":
         FileID = Message.video.file_id
 
-    # Если тип файла – фото.
+    # Если тип файла – аудио.
     elif Message.content_type == "audio":
         FileID = Message.audio.file_id
 
-    # Если тип файла – фото.
+    # Если тип файла – документ.
     elif Message.content_type == "document":
         FileID = Message.document.file_id
+        
     
     try:
         # Получение данных файла.
         FileInfo = Bot.get_file(FileID)
-        logging.info("Получили FileInfo.")
-
+        
         # Если размер файла меньше 20 MB.
         if SizeObject.CheckSize(FileInfo) == True:
-            logging.info("Размер файла меньше 20 мб.")
+            # Размер всех файлов, которые будут скачаны.
+            UpdatingSize = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"] + (float(FileInfo.file_size)/1024)
             # Если размер всех скачанных файлов меньше 20 MB.
-            if ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"]< 20480:
-                logging.info("Размер всех скачанных файлов меньше 20 MB")
+            if UpdatingSize < 20480:
+
+                # Запись в json.
+                UserDataObject._UserData__UpdateSizeUser(UpdatingSize, VariableFilesNotSave(UserDataObject), VariablePremium(UserDataObject))
+
                 # Добавление файла в очередь.
                 FlowObject.AddFileInfo(FileInfo, UserDataObject, Settings)
+
                 logging.info("Добавление файла в очередь.")
 
             # Посылаем сообщение.    
             else:
-                print(FileID)
                 logging.info("1. FileID.")
+
                 Bot.send_message(
             Message.chat.id,
             "Вы привысили лимит скачиваний файлов\. Обратитесь в поддержку\.",
             parse_mode = "MarkdownV2"
         )
                 
-        # Посылаем сообщение. 
-        else: 
-            print(FileID)
-            logging.info("2. FileID.")
-            Bot.send_message(
-            Message.chat.id,
-            "Пока файлы размером больше 20 мб недоступны для скачивания\. Такая функция будет доступна в скором времени\.",
-            parse_mode = "MarkdownV2"
-    )
+
     except: 
-        print(FileID)
+        ManagerObject.ReceivingUnloadedFiles(UserDataObject.getUserID(), FileID)
         logging.info("3. FileID.")
 
 

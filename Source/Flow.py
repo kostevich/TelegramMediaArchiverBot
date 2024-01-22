@@ -3,9 +3,8 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import ReadJSON
+
 from threading import Thread
-from Source.Functions import VariableFilesNotSave, VariablePremium
 
 
 import logging
@@ -63,7 +62,11 @@ class Flow:
     def AddFileInfo(self, FileInfo: any, UserDataObject: any, Settings: dict):
         # Добавление файла в список.
         self.__MessagesBufer.append(FileInfo)
+        
+        # Настройки.
         self.Settings = Settings
+
+        # Пользователь.
         self.UserDataObject = UserDataObject
 
     #==========================================================================================#
@@ -82,12 +85,6 @@ class Flow:
             # Сохранение файла.
             with open(f"Data/Files/{self.UserDataObject.getUserID()}/" + str(MessagesBufer[0].file_unique_id) + FileType, "wb") as FileWriter:
                 FileWriter.write(Response.content)
-
-                # Размер всех скачанных файлов.
-                UpdatingSize = ReadJSON("Data/Users/" + self.UserDataObject.getUserID() + ".json")["Size"] + MessagesBufer[0].file_size/1024
-
-                # Запись в json.
-                self.UserDataObject._UserData__UpdateSizeUser(UpdatingSize, VariableFilesNotSave(self.UserDataObject), VariablePremium(self.UserDataObject))
             
                 # Удаление элемента из списка.
                 MessagesBufer.remove(MessagesBufer[0])  

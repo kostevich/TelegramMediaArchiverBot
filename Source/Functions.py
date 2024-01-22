@@ -16,7 +16,7 @@ import telebot
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
 
@@ -117,15 +117,20 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
     return IsSended
 
-def VariablePremium(UserDataObject)-> bool:
+#==========================================================================================#
+# >>>>> ПОЛУЧЕНИЕ ЗНАЧЕНИЕ ПЕРЕМЕННОЙ PREMIUM <<<<< #
+#==========================================================================================#
+
+def VariablePremium(UserDataObject: any)-> bool:
     Premium = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Premium"]
 
     return Premium
 
+#==========================================================================================#
+# >>>>> ПОЛУЧЕНИЕ ЗНАЧЕНИЕ ПЕРЕМЕННОЙ FILESNOTSAVE  <<<<< #
+#==========================================================================================#
 
-def VariableFilesNotSave(UserDataObject)-> str:
+def VariableFilesNotSave(UserDataObject: any)-> str:
     FilesNotSave = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["FilesNotSave"]
 
     return FilesNotSave
-
-
