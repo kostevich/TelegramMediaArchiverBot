@@ -117,20 +117,3 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
     return IsSended
 
-#==========================================================================================#
-# >>>>> ПОЛУЧЕНИЕ ЗНАЧЕНИЕ ПЕРЕМЕННОЙ PREMIUM <<<<< #
-#==========================================================================================#
-
-def VariablePremium(UserDataObject: any)-> bool:
-    Premium = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Premium"]
-
-    return Premium
-
-#==========================================================================================#
-# >>>>> ПОЛУЧЕНИЕ ЗНАЧЕНИЕ ПЕРЕМЕННОЙ FILESNOTSAVE  <<<<< #
-#==========================================================================================#
-
-def VariableFilesNotSave(UserDataObject: any)-> str:
-    FilesNotSave = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["FilesNotSave"]
-
-    return FilesNotSave

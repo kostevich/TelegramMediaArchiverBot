@@ -23,7 +23,7 @@ class UserData:
 		self.__User = {
 			"Size": 0,
 			"Premium": False, 
-			"FilesNotSave": 0
+			"UnloadedFiles": 0
 		}
 
 		# Создание папки файлов пользователя.
@@ -87,16 +87,21 @@ class UserData:
 	# >>>>> ОБНОВЛЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ <<<<< #
 	#==========================================================================================#
 
-	def __UpdateSizeUser(self, UpdatingSize: int, Premium: bool, FilesNotSave: list) -> dict:
-		self.__User = {
-			"Size": UpdatingSize,
-			"Premium": Premium, 
-			"FilesNotSave": FilesNotSave
-		}
+	def UpdateUser(self, Key: str, Value: any) -> dict:
+		self.__User[Key] = Value
 
 		# Сохранение файла пользователя.
 		self.save()
 
-		logging.info(f"Размер файлов, которые будут скачаны: {UpdatingSize} добавлен в JSON.")
 		return self.__User
+	
+	#==========================================================================================#
+	# >>>>> ПОЛУЧЕНИЕ ЗНАЧЕНИЙ ИЗ JSON ФАЙЛА ПОЛЬЗОВАТЕЛЯ <<<<< #
+	#==========================================================================================#
+	 
+	def GetInfo(UserDataObject: any, Key: str)-> float:
+		Value = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")[Key]
+	
+		return Value 
+
 

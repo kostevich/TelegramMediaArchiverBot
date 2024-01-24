@@ -16,11 +16,16 @@ import requests
 
 class Flow:
 
+    # def getFlowStatus(self) -> bool:
+    #     if len(self.__MessagesBufer) > 0 and self.__Download.is_alive(): return True
+    #     return False
+
+
     #==========================================================================================#
     # >>>>> КОНСТРУКТОР <<<<< #
     #==========================================================================================#
 
-    def __init__(self):
+    def __init__(self, Settings):
         # Создание потока.
         self.__Download = Thread(target = self.__DownloadThread)
 
@@ -32,6 +37,8 @@ class Flow:
 
         # Состояния очереди.
         self.CheckEmptyThread = str()
+
+        self.Settings = Settings
 
     #==========================================================================================#
     # >>>>> ОБРАБОТКА ПОТОКОВЫХ ДАННЫХ <<<<< #
@@ -59,15 +66,14 @@ class Flow:
     # >>>>> ДОБАВЛЕНИЕ ФАЙЛА В ОЧЕРЕДЬ МЕДИАФАЙЛОВ <<<<< #
     #==========================================================================================#   
                    
-    def AddFileInfo(self, FileInfo: any, UserDataObject: any, Settings: dict):
+    def AddFileInfo(self, FileInfo: any, UserDataObject: any):
         # Добавление файла в список.
-        self.__MessagesBufer.append(FileInfo)
-        
-        # Настройки.
-        self.Settings = Settings
-
-        # Пользователь.
-        self.UserDataObject = UserDataObject
+        self.__MessagesBufer.append(
+            {
+                "file": FileInfo,
+                "user_id": UserDataObject.getUserID()
+            }
+        )
 
     #==========================================================================================#
     # >>>>> ЗАГРУЗКА ФАЙЛОВ <<<<< #

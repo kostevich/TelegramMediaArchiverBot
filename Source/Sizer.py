@@ -3,7 +3,7 @@
 # >>>>> СОЗДАНИЕ РАЗМЕРА ФАЙЛОВ <<<<< #
 #==========================================================================================#
 
-class Size:
+class Sizer:
 
     #==========================================================================================#
     # >>>>> КОНСТРУКТОР <<<<< #
@@ -35,15 +35,25 @@ class Size:
     #==========================================================================================#
     # >>>>> КОНВЕРТЕР РАЗМЕРА ФАЙЛА <<<<< #
     #==========================================================================================#
-    def Converter(self, Value) -> str():
-        if Value > 1000:
-            if Value/1024 > 1024:
-                if Value/1024 > 1024:
-                    self.Size = str(Value) + self.Units[3]
-            else: 
-                self.Size = str(Value) + self.Units[2]
-        else:
-            self.Size = str(Value) + self.Units[1]
-        return self.Size
+    def Converter(self, Unit: str, Value: float ) -> float():
+        if Unit == "B":
+            ResultConvertation = Value 
+
+        if Unit == "KB":
+            ResultConvertation = Value/1024 
+
+        if Unit == "MB":
+            ResultConvertation = Value/1024/1024 
+
+        if Unit == "GB":
+            ResultConvertation = Value/1024/1024 
+
+        return ResultConvertation
+
+
+
+
+
+        
                 
     

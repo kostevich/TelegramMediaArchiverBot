@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 #==========================================================================================#
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
@@ -7,9 +6,8 @@
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
 from Source.Flow import Flow
 from Source.Functions import *
-from Source.Size import Size
+from Source.Sizer import Sizer
 from Source.UserData import UserData
-from Source.Manager import Manager
 from telebot import types
 
 
@@ -21,7 +19,7 @@ import telebot
 #==========================================================================================#
 
 # Проверка поддержки используемой версии Python.
-CheckPythonMinimalVersion(3, 11)
+CheckPythonMinimalVersion(3, 10)
 
 # Создание папки в корневой директории.
 MakeRootDirectories(["Data/Files", "Data/Archives", "Data/Users"])
@@ -57,20 +55,18 @@ Bot = telebot.TeleBot(Settings["token"])
 #==========================================================================================#
 
 # Создание экземпляра класса Flow.
-FlowObject = Flow()
+FlowObject = Flow(Settings)
 
 # Создание экземпляра класса Size.
-SizeObject = Size()
+SizerObject = Sizer()
 
-# Создание экземпляра класса Size.
-ManagerObject = Manager()
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
 #==========================================================================================#
 
 @Bot.message_handler(commands=["archive"])
-def ProcessCommandStart(Message: types.Message):
+def ProcessCommandArchive(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
 
@@ -82,7 +78,7 @@ def ProcessCommandStart(Message: types.Message):
     
     else:
         # Отправить инструкции пользователю.
-        Bot.send_message(Message.chat.id, "❗️ Не все ваши файлы сейчас находятся в архиве. Подождите...")
+        Bot.send_message(Message.chat.id, "❗️ Идёт загрузка файлов. Подождите...")
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
@@ -90,9 +86,6 @@ def ProcessCommandStart(Message: types.Message):
 
 @Bot.message_handler(commands=["start"])
 def ProcessCommandStart(Message: types.Message):
-    # Запрос данных пользователя.
-    UserDataObject = UserData(Message.from_user.id)
-
     # Отправка приветствия.
     Bot.send_message(
         Message.chat.id,
@@ -105,12 +98,12 @@ def ProcessCommandStart(Message: types.Message):
 #==========================================================================================#
 
 @Bot.message_handler(commands=["statistics"])
-def ProcessCommandStart(Message: types.Message):
+def ProcessCommandStatistics(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizeObject)
+    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizerObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -140,25 +133,27 @@ def ProcessFileUpload(Message: types.Message):
     elif Message.content_type == "document":
         FileID = Message.document.file_id
         
-    
+        
     try:
         # Получение данных файла.
         FileInfo = Bot.get_file(FileID)
+       
         
         # Если размер файла меньше 20 MB.
-        if SizeObject.CheckSize(FileInfo) == True:
+        if SizerObject.CheckSize(FileInfo) == True:
             # Размер всех файлов, которые будут скачаны.
-            UpdatingSize = ReadJSON("Data/Users/" + UserDataObject.getUserID() + ".json")["Size"] + (float(FileInfo.file_size)/1024)
+            UpdatingSize = UserDataObject.GetInfo("Size") + SizerObject.Converter("KB", FileInfo.file_size)
+
             # Если размер всех скачанных файлов меньше 20 MB.
             if UpdatingSize < 20480:
 
                 # Запись в json.
-                UserDataObject._UserData__UpdateSizeUser(UpdatingSize, VariableFilesNotSave(UserDataObject), VariablePremium(UserDataObject))
+                UserDataObject.UpdateUser("Size", UpdatingSize)
 
                 # Добавление файла в очередь.
-                FlowObject.AddFileInfo(FileInfo, UserDataObject, Settings)
+                FlowObject.AddFileInfo(FileInfo, UserDataObject)
 
-                logging.info("Добавление файла в очередь.")
+                logging.info("Файл добавлен в очередь.")
 
             # Посылаем сообщение.    
             else:
@@ -172,9 +167,11 @@ def ProcessFileUpload(Message: types.Message):
                 
 
     except: 
-        ManagerObject.ReceivingUnloadedFiles(UserDataObject.getUserID(), FileID)
+        UserDataObject.UpdateUser("UnloadedFiles", {
+                "file": FileID,
+                "user_id": UserDataObject.getUserID()
+            })
         logging.info("3. FileID.")
-
 
 
 # Запуск обработки запросов Telegram.
