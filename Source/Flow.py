@@ -3,23 +3,30 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-
 from threading import Thread
 
 
-import logging
 import requests
+import logging
 
 #==========================================================================================#
 # >>>>> ПОТОК И ЕГО ОБРАБОТКА <<<<< #
 #==========================================================================================#
 
 class Flow:
-
-    # def getFlowStatus(self) -> bool:
-    #     if len(self.__MessagesBufer) > 0 and self.__Download.is_alive(): return True
-    #     return False
-
+    
+    #==========================================================================================#
+    # >>>>> ОБРАБОТКА ПОТОКА <<<<< #
+    #==========================================================================================#
+        
+    def __DownloadThread(self):
+        # Логгирование.
+        logging.info("Поток запущен.")
+        
+        # Пока поток запущен.
+        while True:
+            # Скачиваем файл.
+            self.DownloadFile()
 
     #==========================================================================================#
     # >>>>> КОНСТРУКТОР <<<<< #
@@ -36,31 +43,10 @@ class Flow:
         self.__Download.start()
 
         # Состояния очереди.
-        self.CheckEmptyThread = str()
+        self.CheckEmptyThread = self.EmptyFlowStatus
 
+        # Настройки.
         self.Settings = Settings
-
-    #==========================================================================================#
-    # >>>>> ОБРАБОТКА ПОТОКОВЫХ ДАННЫХ <<<<< #
-    #==========================================================================================#
-        
-    def __DownloadThread(self):
-        # Логгирование.
-        logging.info("Поток запущен.")
-        
-        # Пока сообщение не отправлено.
-        while True:
-            # Если в очереди на загрузке есть медиафайлы.
-            if len(self.__MessagesBufer) > 0:
-                # Сохранение состояния очереди.
-                self.CheckEmptyThread = False
-
-                # Скачиваем файл.
-                self.DownloadFile(self.__MessagesBufer)
-
-            else: 
-                # Сохранение состояния очереди.
-                self.CheckEmptyThread = True
 
     #==========================================================================================#
     # >>>>> ДОБАВЛЕНИЕ ФАЙЛА В ОЧЕРЕДЬ МЕДИАФАЙЛОВ <<<<< #
@@ -70,8 +56,8 @@ class Flow:
         # Добавление файла в список.
         self.__MessagesBufer.append(
             {
-                "file": FileInfo,
-                "user_id": UserDataObject.getUserID()
+                "File": FileInfo,
+                "User": UserDataObject.GetUserID()
             }
         )
 
@@ -79,22 +65,40 @@ class Flow:
     # >>>>> ЗАГРУЗКА ФАЙЛОВ <<<<< #
     #==========================================================================================# 
            
-    def DownloadFile(self, MessagesBufer: list):
+    def DownloadFile(self):
         # Получение данных файла.
         try:
+            # Данные файла из списка словарей.
+            File = self.__MessagesBufer[0]["File"]
+
+            # Данные пользователя из списка словарей.
+            User = self.__MessagesBufer[0]["User"]
+
             # Расширение файла.
-            FileType = "." + MessagesBufer[0].file_path.split('.')[-1]
+            FileType = "." + File.file_path.split('.')[-1]
 
             # Загрузка файла.
-            Response = requests.get("https://api.telegram.org/file/bot" + self.Settings["token"] + f"/{ MessagesBufer[0].file_path}")
-            
+            Response = requests.get("https://api.telegram.org/file/bot" + self.Settings["token"] + "/" + f"{File.file_path}")
+
             # Сохранение файла.
-            with open(f"Data/Files/{self.UserDataObject.getUserID()}/" + str(MessagesBufer[0].file_unique_id) + FileType, "wb") as FileWriter:
+            with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
                 FileWriter.write(Response.content)
-            
+
                 # Удаление элемента из списка.
-                MessagesBufer.remove(MessagesBufer[0])  
+                self.__MessagesBufer.pop(0)
                 
-        except: 
+        except:
             # Логгирование.
             logging.error("Не получилось загрузить файл.") 
+
+    #==========================================================================================#
+    # >>>>> ПРОВЕРКА ПУСТОТЫ ПОТОКА <<<<< #
+    #==========================================================================================#
+            
+    def EmptyFlowStatus(self) -> bool:
+        # Если в списке есть элементы.
+        if len(self.__MessagesBufer) > 0: 
+            return False
+        else:
+            return True
+            

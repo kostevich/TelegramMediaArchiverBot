@@ -7,10 +7,9 @@ from dublib.Methods import RemoveFolderContent, ReadJSON
 
 
 import datetime
-import os
-import shutil
 import telebot
-
+import shutil
+import os
         
 #==========================================================================================#
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
@@ -24,7 +23,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
     Files = os.listdir("Data/Files/" + str(UserID))
 
     # Размер всех скачанных файлов.
-    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")                                                               
+    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")  
 
     # Словарь типов файлов.
     FileTypes = {
@@ -67,7 +66,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
     MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
-    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(SizeObject.Converter(int(Size["Size"]))).replace('.','\.')
+    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(SizeObject.Converter("MB", int(Size["Size"]))).replace('.','\.')
 
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
@@ -76,7 +75,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
-def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any) -> bool:
+def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any):
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
@@ -89,7 +88,8 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
     # Если существуют файлы для архивации.
     while len(os.listdir("Data/Files/" + UserID)) > 0:
-        if len(FlowObject._Flow__MessagesBufer) <= 0:
+        # Если поток пустой.
+        if FlowObject.EmptyFlowStatus == True:
             # Архивирование файлов пользователя.
             shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
 
@@ -111,9 +111,10 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
             
             # Переключение состояния.
             IsSended = True
-            
+
         else:
             Bot.send_message(ChatID, "❗ Не все ваши файлы сейчас находятся в архиве. Подождите...")
 
     return IsSended
+
 

@@ -4,10 +4,10 @@
 #==========================================================================================#
 
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
-from Source.Flow import Flow
-from Source.Functions import *
-from Source.Sizer import Sizer
+from Source.Functions import GenerateStatistics, SendArchive
 from Source.UserData import UserData
+from Source.Sizer import Sizer
+from Source.Flow import Flow
 from telebot import types
 
 
@@ -25,6 +25,15 @@ CheckPythonMinimalVersion(3, 10)
 MakeRootDirectories(["Data/Files", "Data/Archives", "Data/Users"])
 
 #==========================================================================================#
+# >>>>> НАСТРОЙКА ЛОГИРОВАНИЯ <<<<< #
+#==========================================================================================#
+
+# Создание настроек логирования.
+logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log", filemode="w",
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
+#==========================================================================================#
 # >>>>> ЧТЕНИЕ НАСТРОЕК <<<<< #
 #==========================================================================================#
 
@@ -36,14 +45,6 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "":
     raise Exception("Invalid Telegram bot token.")
 
 #==========================================================================================#
-# >>>>> НАСТРОЙКА ЛОГИРОВАНИЯ <<<<< #
-#==========================================================================================#
-
-logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log", filemode="w",
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
-
-#==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ БОТА <<<<< #
 #==========================================================================================#
 
@@ -51,15 +52,14 @@ logging.basicConfig(level=logging.INFO, encoding="utf-8", filename="LOGING.log",
 Bot = telebot.TeleBot(Settings["token"])
 
 #==========================================================================================#
-# >>>>> СОЗДАНИЕ ЭКЗЕМПЛЯРОВ КЛАССА <<<<< #
+# >>>>> СОЗДАНИЕ ОБЪЕКТОВ <<<<< #
 #==========================================================================================#
 
-# Создание экземпляра класса Flow.
+# Создание объекта класса Flow.
 FlowObject = Flow(Settings)
 
-# Создание экземпляра класса Size.
+# Создание объекта класса Sizer.
 SizerObject = Sizer()
-
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
@@ -70,9 +70,10 @@ def ProcessCommandArchive(Message: types.Message):
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
 
-    if FlowObject.CheckEmptyThread == True:
+    # Если очередь отправки файлов пуста.
+    if FlowObject.EmptyFlowStatus() == True:
         # Если не удалась отправка архива.
-        if SendArchive(Bot, UserDataObject.getUserID(), Message.chat.id, FlowObject) == False:
+        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, FlowObject) == False:
             # Отправить инструкции пользователю.
             Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
     
@@ -103,7 +104,7 @@ def ProcessCommandStatistics(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.getUserID(), Message.chat.id, SizerObject)
+    GenerateStatistics(Bot, UserDataObject.GetUserID(), Message.chat.id, SizerObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -131,48 +132,40 @@ def ProcessFileUpload(Message: types.Message):
 
     # Если тип файла – документ.
     elif Message.content_type == "document":
-        FileID = Message.document.file_id
-        
-        
+        FileID = Message.document.file_id     
+ 
     try:
-        # Получение данных файла.
+        # Получение данных файла. 
         FileInfo = Bot.get_file(FileID)
-       
-        
+
         # Если размер файла меньше 20 MB.
         if SizerObject.CheckSize(FileInfo) == True:
+            
             # Размер всех файлов, которые будут скачаны.
-            UpdatingSize = UserDataObject.GetInfo("Size") + SizerObject.Converter("KB", FileInfo.file_size)
-
+            UpdatingSize = UserDataObject.GetInfo(UserDataObject.GetUserID(), "Size") + SizerObject.Converter("KB", FileInfo.file_size)
+            
             # Если размер всех скачанных файлов меньше 20 MB.
             if UpdatingSize < 20480:
 
                 # Запись в json.
-                UserDataObject.UpdateUser("Size", UpdatingSize)
-
+                UserDataObject.UpdateUser("Size", UpdatingSize, "Update")
+            
                 # Добавление файла в очередь.
                 FlowObject.AddFileInfo(FileInfo, UserDataObject)
-
-                logging.info("Файл добавлен в очередь.")
-
-            # Посылаем сообщение.    
+    
             else:
-                logging.info("1. FileID.")
-
-                Bot.send_message(
-            Message.chat.id,
-            "Вы привысили лимит скачиваний файлов\. Обратитесь в поддержку\.",
-            parse_mode = "MarkdownV2"
-        )
-                
+                # Добавление незагруженных файлов.
+                UserDataObject.UpdateUser("UnloadedFiles", {
+                "file": FileID,
+                "user_id": UserDataObject.GetUserID()
+            }, "Add")
 
     except: 
+        # Добавление незагруженных файлов.
         UserDataObject.UpdateUser("UnloadedFiles", {
                 "file": FileID,
-                "user_id": UserDataObject.getUserID()
-            })
-        logging.info("3. FileID.")
-
+                "user_id": UserDataObject.GetUserID()
+            }, "Add")
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)
