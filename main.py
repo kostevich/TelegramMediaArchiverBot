@@ -104,7 +104,7 @@ def ProcessCommandStatistics(Message: types.Message):
     UserDataObject = UserData(Message.from_user.id)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.GetUserID(), Message.chat.id, SizerObject)
+    GenerateStatistics(Bot, UserDataObject.GetUserID(), Message.chat.id, SizerObject, FlowObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -137,21 +137,24 @@ def ProcessFileUpload(Message: types.Message):
     try:
         # Получение данных файла. 
         FileInfo = Bot.get_file(FileID)
-
+        
+        # Логгирование.
+        logging.info("Получены данные файла.")
+        
         # Если размер файла меньше 20 MB.
         if SizerObject.CheckSize(FileInfo) == True:
-            
             # Размер всех файлов, которые будут скачаны.
             UpdatingSize = UserDataObject.GetInfo(UserDataObject.GetUserID(), "Size") + SizerObject.Converter("KB", FileInfo.file_size)
             
             # Если размер всех скачанных файлов меньше 20 MB.
             if UpdatingSize < 20480:
-
                 # Запись в json.
                 UserDataObject.UpdateUser("Size", UpdatingSize, "Update")
-            
+               
                 # Добавление файла в очередь.
                 FlowObject.AddFileInfo(FileInfo, UserDataObject)
+                
+                logging.info("Файл добавлен в очередь.")
     
             else:
                 # Добавление незагруженных файлов.

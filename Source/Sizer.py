@@ -10,7 +10,8 @@ class Sizer:
     #==========================================================================================#  
       
     def __init__(self):
-        pass
+        # Единицы размеров файлов.
+        self.Units = ['B', 'KB', 'MB', 'GB']
 
     #==========================================================================================#
     # >>>>> ПРОВЕРКА РАЗМЕРА ФАЙЛА <<<<< #
@@ -33,18 +34,38 @@ class Sizer:
     #==========================================================================================#
     # >>>>> КОНВЕРТЕР РАЗМЕРА ФАЙЛА <<<<< #
     #==========================================================================================#
-    def Converter(self, Unit: str, Value: float) -> float:
+    def Converter(self, Unit: str, Value: float) -> any:
+        # Перевод в байты.
         if Unit == "B":
             ResultConvertation = Value 
 
+        # Перевод в килобайты.
         if Unit == "KB":
             ResultConvertation = Value/1024 
 
+        # Перевод в мегабайты.
         if Unit == "MB":
             ResultConvertation = Value/1024/1024 
 
+        # Перевод в гигабайты.
         if Unit == "GB":
-            ResultConvertation = Value/1024/1024 
+            ResultConvertation = Value/1024/1024
+
+        # Перевод в наиболее лучший формат для чтения.
+        if Unit == "Any":
+            if Value > 1024:
+                if Value/1024 > 1024:
+                    if Value/1024 > 1024:
+                        # Перевод в гигабайты.
+                        ResultConvertation = str(Value) + self.Units[3]
+
+                # Перевод в мегабайты.
+                else: 
+                    ResultConvertation = str(Value) + self.Units[2]
+
+            # Перевод в килобайты.
+            else:
+                ResultConvertation = str(Value) + self.Units[1]
 
         return ResultConvertation
 

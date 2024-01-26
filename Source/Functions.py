@@ -15,7 +15,7 @@ import os
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any, FlowObject):
     # Текст сообщения.
     MessageText = "Я собрал для вас статистику по типам файлов в вашем архиве\.\n\n"
 
@@ -61,13 +61,18 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
         if IsTyped == False:
             FileTypes["document"] +=1
 
+    print(str(FlowObject.CountMessagesBufer()))
+    
     # Добавление счётчиков.
+    MessageText += "⏳ _Количество файлов, которые загружаются_\: " + str(FlowObject.CountMessagesBufer()) + "\n" + "\n"
     MessageText += "📷 _Фото_\: " + str(FileTypes["photo"]) + "\n"
     MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
-    MessageText += "❔📦_Размер всех медиафайлов_\: " + str(SizeObject.Converter("MB", int(Size["Size"]))).replace('.','\.')
+    MessageText += "❔📦 _Размер всех медиафайлов_\: " + str(SizeObject.Converter("Any", int(Size["Size"]))).replace('.','\.') + "\n" + "\n"
 
+    MessageText += "❔❌_Количество медиафайлов, доступных для скачивания только в Premium версии_\: "  + str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
+    print(MessageText)
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
 
@@ -88,32 +93,28 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
     # Если существуют файлы для архивации.
     while len(os.listdir("Data/Files/" + UserID)) > 0:
-        # Если поток пустой.
-        if FlowObject.EmptyFlowStatus == True:
-            # Архивирование файлов пользователя.
-            shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
 
-            # Очистка файлов пользователя. 
-            RemoveFolderContent("Data/Files/" + UserID)
+        # Архивирование файлов пользователя.
+        shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
 
-            # Бинарное содержимое архива.
-            BinaryArchive = None
+        # Очистка файлов пользователя. 
+        RemoveFolderContent("Data/Files/" + UserID)
 
-            # Чтение архива.
-            with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
-                BinaryArchive = FileReader.read()
+        # Бинарное содержимое архива.
+        BinaryArchive = None
 
-            # Отправка архива пользователю.
-            Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+        # Чтение архива.
+        with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
+            BinaryArchive = FileReader.read()
 
-            # Очистка архивов пользователя. 
-            RemoveFolderContent("Data/Archives/" + UserID)
-            
-            # Переключение состояния.
-            IsSended = True
-
-        else:
-            Bot.send_message(ChatID, "❗ Не все ваши файлы сейчас находятся в архиве. Подождите...")
+        # Отправка архива пользователю.
+        Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+       
+        # Очистка архивов пользователя. 
+        RemoveFolderContent("Data/Archives/" + UserID)
+        
+        # Переключение состояния.
+        IsSended = True
 
     return IsSended
 
