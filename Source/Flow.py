@@ -54,6 +54,7 @@ class Flow:
     #==========================================================================================#   
                    
     def AddFileInfo(self, FileInfo: any, UserDataObject: any):
+        print(FileInfo)
         # Добавление файла в список.
         self.__MessagesBufer.append(
             {

@@ -72,7 +72,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
     MessageText += "❔📦 _Размер всех медиафайлов_\: " + str(SizeObject.Converter("Any", int(Size["Size"]))).replace('.','\.') + "\n" + "\n"
 
     MessageText += "❔❌_Количество медиафайлов, доступных для скачивания только в Premium версии_\: "  + str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
-    print(MessageText)
+    
     # Отправка статистики.
     Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
 
@@ -80,7 +80,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
-def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any):
+def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int):
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
@@ -109,6 +109,9 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, FlowObject: any)
 
         # Отправка архива пользователю.
         Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+
+        # Отправка файлов, которые невозможно скачать.
+        Bot.send_document(ChatID, document= ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"][0]["file"])
        
         # Очистка архивов пользователя. 
         RemoveFolderContent("Data/Archives/" + UserID)

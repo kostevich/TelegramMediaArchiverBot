@@ -73,7 +73,7 @@ def ProcessCommandArchive(Message: types.Message):
     # Если очередь отправки файлов пуста.
     if FlowObject.EmptyFlowStatus() == True:
         # Если не удалась отправка архива.
-        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, FlowObject) == False:
+        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id) == False:
             # Отправить инструкции пользователю.
             Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
     
