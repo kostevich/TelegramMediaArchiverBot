@@ -54,7 +54,6 @@ class Flow:
     #==========================================================================================#   
                    
     def AddFileInfo(self, FileInfo: any, UserDataObject: any):
-        print(FileInfo)
         # Добавление файла в список.
         self.__MessagesBufer.append(
             {
@@ -85,9 +84,13 @@ class Flow:
             # Сохранение файла.
             with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
                 FileWriter.write(Response.content)
+                # Логгирование.
+                logging.info("Файл скачан.")
 
                 # Удаление элемента из списка.
                 self.__MessagesBufer.pop(0)
+                # Логгирование.
+                logging.info("Файл удалён из буфера.")
                 
         except:
             # Логгирование.

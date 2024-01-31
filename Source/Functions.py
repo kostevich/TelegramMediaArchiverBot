@@ -7,6 +7,7 @@ from dublib.Methods import RemoveFolderContent, ReadJSON
 
 
 import datetime
+import logging
 import telebot
 import shutil
 import os
@@ -21,9 +22,9 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + str(UserID))
-
+    
     # Размер всех скачанных файлов.
-    Size = ReadJSON("Data/Users/" + str(UserID) + ".json")  
+    Size = SizeObject.GetSizeDirectory(Files, str(UserID))
 
     # Словарь типов файлов.
     FileTypes = {
@@ -61,16 +62,17 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
         if IsTyped == False:
             FileTypes["document"] +=1
 
-    print(str(FlowObject.CountMessagesBufer()))
-    
-    # Добавление счётчиков.
+    # Добавление статистики.
     MessageText += "⏳ _Количество файлов, которые загружаются_\: " + str(FlowObject.CountMessagesBufer()) + "\n" + "\n"
+    MessageText += "⏳ _Типы файлов в вашем хранилище_\: " + "\n"
     MessageText += "📷 _Фото_\: " + str(FileTypes["photo"]) + "\n"
     MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
     MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
     MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n"
-    MessageText += "❔📦 _Размер всех медиафайлов_\: " + str(SizeObject.Converter("Any", int(Size["Size"]))).replace('.','\.') + "\n" + "\n"
-
+    try:
+        MessageText += "❔📦 _Размер всех медиафайлов_\: " + str(SizeObject.Converter("Any", Size)).replace('.','\.') + "\n" + "\n"
+    except:
+        MessageText += "❔📦 _Размер всех медиафайлов_\: " + "0B" + "\n" + "\n"
     MessageText += "❔❌_Количество медиафайлов, доступных для скачивания только в Premium версии_\: "  + str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
     
     # Отправка статистики.
@@ -80,7 +82,7 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
-def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int):
+def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: any ):
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
@@ -97,6 +99,9 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int):
         # Архивирование файлов пользователя.
         shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
 
+        # Логгирование.
+        logging.info("Архив собран.")
+
         # Очистка файлов пользователя. 
         RemoveFolderContent("Data/Files/" + UserID)
 
@@ -106,12 +111,57 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int):
         # Чтение архива.
         with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
             BinaryArchive = FileReader.read()
-
+        
         # Отправка архива пользователю.
         Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
 
-        # Отправка файлов, которые невозможно скачать.
-        Bot.send_document(ChatID, document= ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"][0]["file"])
+        # Логгирование.
+        logging.info("Архив отправлен.")
+
+        try: 
+            # Получение списка словарей незагруженных файлов.
+            UnloadedFiles = UserDataObject.GetInfo(UserID, "UnloadedFiles")
+
+            # print(UnloadedFiles)
+            # print(UnloadedFiles[0]["type"])
+                
+            if UnloadedFiles[0]["type"] == "document":
+                # logging.info("Отправка документа началась.")   
+                # Отправка файлов, которые невозможно скачать.
+                Bot.send_document(ChatID, document = UnloadedFiles[0]["file"])
+
+                # Логгирование.
+                logging.info("Отправка документа удалась.")   
+
+            if UnloadedFiles[0]["type"] == "audio":
+                # logging.info("Отправка документа началась.")   
+                # Отправка файлов, которые невозможно скачать.
+                Bot.send_audio(ChatID, audio = UnloadedFiles[0]["file"])
+
+                # Логгирование.
+                logging.info("Отправка аудио удалась.")   
+
+            if UnloadedFiles[0]["type"] == "video":
+                # logging.info("Отправка документа началась.")   
+                # Отправка файлов, которые невозможно скачать.
+                Bot.send_video(ChatID, video = UnloadedFiles[0]["file"])
+
+                # Логгирование.
+                logging.info("Отправка видео удалась.")   
+
+            if UnloadedFiles[0]["type"] == "photo":
+                # logging.info("Отправка документа началась.")   
+                # Отправка файлов, которые невозможно скачать.
+                Bot.send_photo(ChatID, photo = UnloadedFiles[0]["file"])
+
+                # Логгирование.
+                logging.info("Отправка фото удалась.")   
+             
+
+
+        except:
+            # Логгирование.
+            logging.info("Отправка файла не удалась")
        
         # Очистка архивов пользователя. 
         RemoveFolderContent("Data/Archives/" + UserID)

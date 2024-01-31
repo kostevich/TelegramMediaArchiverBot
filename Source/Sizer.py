@@ -1,10 +1,17 @@
 
+
+#==========================================================================================#
+# >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
+#==========================================================================================#
+
+import os
+
 #==========================================================================================#
 # >>>>> СОЗДАНИЕ РАЗМЕРА ФАЙЛОВ <<<<< #
 #==========================================================================================#
 
 class Sizer:
-
+    
     #==========================================================================================#
     # >>>>> КОНСТРУКТОР <<<<< #
     #==========================================================================================#  
@@ -35,6 +42,7 @@ class Sizer:
     # >>>>> КОНВЕРТЕР РАЗМЕРА ФАЙЛА <<<<< #
     #==========================================================================================#
     def Converter(self, Unit: str, Value: float) -> any:
+
         # Перевод в байты.
         if Unit == "B":
             ResultConvertation = Value 
@@ -53,21 +61,38 @@ class Sizer:
 
         # Перевод в наиболее лучший формат для чтения.
         if Unit == "Any":
-            if Value > 1024:
-                if Value/1024 > 1024:
-                    if Value/1024 > 1024:
-                        # Перевод в гигабайты.
-                        ResultConvertation = str(Value) + self.Units[3]
-
-                # Перевод в мегабайты.
-                else: 
-                    ResultConvertation = str(Value) + self.Units[2]
+            if Value < 1024:
+                # Перевод в байты.
+                ResultConvertation = str(round(Value, 1)) + self.Units[0]
 
             # Перевод в килобайты.
-            else:
-                ResultConvertation = str(Value) + self.Units[1]
+            if Value > 1024:
+                ResultConvertation = str(round(Value/1024, 1)) + self.Units[1]
+
+            if Value/1024 > 1024:
+                    ResultConvertation = str(round(Value/1048576, 1)) + self.Units[2]
+
+            # Перевод в гигабайты.
+            if Value/1024/1024 > 1024:
+                ResultConvertation = str(round(Value/1048576/1024, 1)) + self.Units[3]
 
         return ResultConvertation
+    
+
+    def GetSizeDirectory(self, Files: list[str], UserID: str)-> int:
+        # Размер всех файлов.
+        self.SizeFiles = 0
+        
+        # Название файлов в директории.
+        for file in Files:
+            # Размер скачанного файла.
+            SizeFile = os.path.getsize("Data/Files/" + str(UserID)+ "/" + file)
+
+            # Размер всех скачанных файлов.
+            self.SizeFiles += SizeFile
+
+        return self.SizeFiles
+        
 
 
 

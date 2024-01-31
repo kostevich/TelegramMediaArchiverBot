@@ -73,7 +73,7 @@ def ProcessCommandArchive(Message: types.Message):
     # Если очередь отправки файлов пуста.
     if FlowObject.EmptyFlowStatus() == True:
         # Если не удалась отправка архива.
-        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id) == False:
+        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, UserDataObject) == False:
             # Отправить инструкции пользователю.
             Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
     
@@ -160,14 +160,17 @@ def ProcessFileUpload(Message: types.Message):
                 # Добавление незагруженных файлов.
                 UserDataObject.UpdateUser("UnloadedFiles", {
                 "file": FileID,
-                "user_id": UserDataObject.GetUserID()
+                "userid": UserDataObject.GetUserID(), 
+                "type": Message.content_type
+
             }, "Add")
 
     except: 
         # Добавление незагруженных файлов.
         UserDataObject.UpdateUser("UnloadedFiles", {
                 "file": FileID,
-                "user_id": UserDataObject.GetUserID()
+                "userid": UserDataObject.GetUserID(), 
+                "type": Message.content_type
             }, "Add")
 
 # Запуск обработки запросов Telegram.
