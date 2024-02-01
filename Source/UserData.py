@@ -25,11 +25,14 @@ class UserData:
 			"UnloadedFiles": []
 		}
 
-		# Создание папки файлов пользователя.
-		os.makedirs("Data/Files/" + self.__UserID)
+		if os.path.exists(("Data/Files/" + self.__UserID)):
+			pass
+		else:
+			# Создание папки файлов пользователя.
+			os.makedirs("Data/Files/" + self.__UserID)
 
-		# Создание папки архивов пользователя.
-		os.makedirs("Data/Archives/" + self.__UserID)
+			# Создание папки архивов пользователя.
+			os.makedirs("Data/Archives/" + self.__UserID)
 
 		# Сохранение файла пользователя.
 		self.__Save()

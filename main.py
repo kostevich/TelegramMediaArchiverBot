@@ -3,7 +3,7 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
+from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
 from Source.Functions import GenerateStatistics, SendArchive
 from Source.UserData import UserData
 from Source.Sizer import Sizer
@@ -75,11 +75,33 @@ def ProcessCommandArchive(Message: types.Message):
         # Если не удалась отправка архива.
         if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, UserDataObject) == False:
             # Отправить инструкции пользователю.
-            Bot.send_message(Message.chat.id, "❗ Вы не отправили мне ни одного файла.")
+            Bot.send_message(Message.chat.id, "❗️ Ошибка\n\n Вы не отправили мне ни одного файла.")
     
     else:
         # Отправить инструкции пользователю.
-        Bot.send_message(Message.chat.id, "❗️ Идёт загрузка файлов. Подождите...")
+        Bot.send_message(Message.chat.id, "⏳\n\n Идёт загрузка файлов. Повторите попытку позже...")
+
+#==========================================================================================#
+# >>>>> ОБРАБОТКА КОМАНДЫ ClEAR <<<<< #
+#==========================================================================================#
+
+@Bot.message_handler(commands=["clear"])
+def ProcessCommandArchive(Message: types.Message):
+    # Запрос данных пользователя.
+    UserDataObject = UserData(Message.from_user.id)
+
+    # Есть ли файлы пользователя в потоке.
+    if FlowObject.CheckUserFilesPresence(UserDataObject.GetUserID()) == False:
+        # Удаление файлов пользователя.
+        RemoveFolderContent("Data/Files/" + UserDataObject.GetUserID())
+
+        # Отправка сообщения.
+        Bot.send_message(Message.chat.id, "✅\n\n Сборка файлов очищена.")
+
+    else:
+        # Отправка сообщения.
+        Bot.send_message(Message.chat.id, "⏳\n\n Повторите попытку позже.")
+       
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
@@ -90,7 +112,7 @@ def ProcessCommandStart(Message: types.Message):
     # Отправка приветствия.
     Bot.send_message(
         Message.chat.id,
-        "Пришлите мне сообщения, содержащие медиафайлы, и я соберу их для вас в один архив\.\n\n*Список команд\:*\n/start – начать работу с ботом;\n/statistics – вывести статистику типов медиафайлов;\n/archive – отправить архив с медиафайлами\.",
+        "ℹ️ Пришлите мне сообщения, содержащие медиафайлы, и я соберу их для вас в один архив\.\n\n*Список команд\:*\n/start – начать работу с ботом;\n/clear – сбросить архивирование;\n/statistics – вывести статистику типов медиафайлов;\n/archive – отправить архив с медиафайлами\.",
         parse_mode = "MarkdownV2"
     )
 

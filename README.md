@@ -31,6 +31,8 @@ pip install -r requirements.txt
 
 Start - start working.
 
+Сlear - reset the archive build.
+
 Statistics - send file statistics.
 
 Archive - archive files and send it.

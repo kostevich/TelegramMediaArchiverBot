@@ -8,6 +8,7 @@ from threading import Thread
 
 import requests
 import logging
+import os
 
 #==========================================================================================#
 # >>>>> ПОТОК И ЕГО ОБРАБОТКА <<<<< #
@@ -95,27 +96,34 @@ class Flow:
         try:
             # Данные файла из списка словарей.
             File = self.__MessagesBufer[0]["File"]
-
+            
             # Данные пользователя из списка словарей.
             User = self.__MessagesBufer[0]["User"]
 
-            # Расширение файла.
-            FileType = "." + File.file_path.split('.')[-1]
-
-            # Загрузка файла.
-            Response = requests.get("https://api.telegram.org/file/bot" + self.Settings["token"] + "/" + f"{File.file_path}")
-
-            # Сохранение файла.
-            with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
-                FileWriter.write(Response.content)
-                # Логгирование.
-                logging.info("Файл скачан.")
+            # Если такой же файл найден.
+            if os.path.exists(f"Data\Files\{User}\{File.file_unique_id}.{File.file_path.split('.')[1]}"):
+                logging.info("Файл идентичен уже имеющемуся")
 
                 # Удаление элемента из списка.
                 self.__MessagesBufer.pop(0)
-                # Логгирование.
-                logging.info("Файл удалён из буфера.")
-                
+
+            else:
+                # Расширение файла.
+                FileType = "." + File.file_path.split('.')[-1]
+
+                # Загрузка файла.
+                Response = requests.get("https://api.telegram.org/file/bot" + self.Settings["token"] + "/" + f"{File.file_path}")
+
+                # Сохранение файла.
+                with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
+                    FileWriter.write(Response.content)
+
+                    # Логгирование.
+                    logging.info("Файл скачан.")
+
+                    # Удаление элемента из списка.
+                    self.__MessagesBufer.pop(0)
+                    
         except:
             # Логгирование.
             logging.error("Не получилось загрузить файл.") 
@@ -128,6 +136,7 @@ class Flow:
         # Если в списке есть элементы.
         if len(self.__MessagesBufer) > 0: 
             return False
+        
         else:
             return True
 
@@ -136,4 +145,5 @@ class Flow:
     #==========================================================================================#
         
     def CountMessagesBufer(self):
-        return str(len(self.__MessagesBufer))		
+        return str(len(self.__MessagesBufer))
+    
