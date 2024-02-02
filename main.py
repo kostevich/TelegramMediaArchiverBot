@@ -5,6 +5,7 @@
 
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
 from Source.Functions import GenerateStatistics, SendArchive
+from Source.MessageBox import MessageBox
 from Source.UserData import UserData
 from Source.Sizer import Sizer
 from Source.Flow import Flow
@@ -61,6 +62,9 @@ FlowObject = Flow(Settings)
 # Создание объекта класса Sizer.
 SizerObject = Sizer()
 
+# Создание объекта класса MessageBox.
+MessageBoxObject = MessageBox(bot = Bot)
+
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
 #==========================================================================================#
@@ -74,9 +78,9 @@ def ProcessCommandArchive(Message: types.Message):
     if FlowObject.EmptyFlowStatus() == True:
         # Если не удалась отправка архива.
         if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, UserDataObject) == False:
-            # Отправить инструкции пользователю.
-            Bot.send_message(Message.chat.id, "❗️ Ошибка\n\n Вы не отправили мне ни одного файла.")
-    
+            # Отправка сообщения: пользователь не отправил ни одного файла.
+            MessageBoxObject.send(Message.chat.id, "no-files", "error")
+
     else:
         # Отправить инструкции пользователю.
         Bot.send_message(Message.chat.id, "⏳\n\n Идёт загрузка файлов. Повторите попытку позже...")
