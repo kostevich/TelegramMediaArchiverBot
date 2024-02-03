@@ -1,3 +1,8 @@
+
+#==========================================================================================#
+# >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
+#==========================================================================================#
+
 from dublib.Methods import ReadJSON
 from telebot import TeleBot
 
@@ -25,7 +30,7 @@ class MessageBox:
 
 		return Message
 
-	def __init__(self, path: str = "Data/Messages.json", bot: TeleBot | None = None):
+	def __init__(self, path: str = "Source/Messages.json", Bot: TeleBot | None = None):
 		"""
 		Контейнер сообщений Telegram.
 			path – путь к файлу с сообщениями.
@@ -36,7 +41,7 @@ class MessageBox:
 		# Данные сообщений.
 		self.__Data = ReadJSON(path)
 		# Экземпляр бота.
-		self.__Bot = bot
+		self.__Bot = Bot
 
 	def get(self, key: str, header: str | None = None, data: dict | None = None) -> str:
 		"""

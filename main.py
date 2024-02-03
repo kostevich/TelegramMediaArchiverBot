@@ -63,7 +63,7 @@ FlowObject = Flow(Settings)
 SizerObject = Sizer()
 
 # Создание объекта класса MessageBox.
-MessageBoxObject = MessageBox(bot = Bot)
+MessageBoxObject = MessageBox(Bot = Bot)
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
@@ -83,7 +83,7 @@ def ProcessCommandArchive(Message: types.Message):
 
     else:
         # Отправить инструкции пользователю.
-        Bot.send_message(Message.chat.id, "⏳\n\n Идёт загрузка файлов. Повторите попытку позже...")
+        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {"reason": "Идёт загрузка файлов."})
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ClEAR <<<<< #
@@ -100,11 +100,11 @@ def ProcessCommandArchive(Message: types.Message):
         RemoveFolderContent("Data/Files/" + UserDataObject.GetUserID())
 
         # Отправка сообщения.
-        Bot.send_message(Message.chat.id, "✅\n\n Сборка файлов очищена.")
+        MessageBoxObject.send(Message.chat.id, "wellclear", "done")
 
     else:
         # Отправка сообщения.
-        Bot.send_message(Message.chat.id, "⏳\n\n Повторите попытку позже.")
+        MessageBoxObject.send(Message.chat.id, "expectation", "waiting")
        
 
 #==========================================================================================#
@@ -114,11 +114,8 @@ def ProcessCommandArchive(Message: types.Message):
 @Bot.message_handler(commands=["start"])
 def ProcessCommandStart(Message: types.Message):
     # Отправка приветствия.
-    Bot.send_message(
-        Message.chat.id,
-        "ℹ️ Пришлите мне сообщения, содержащие медиафайлы, и я соберу их для вас в один архив\.\n\n*Список команд\:*\n/start – начать работу с ботом;\n/clear – сбросить архивирование;\n/statistics – вывести статистику типов медиафайлов;\n/archive – отправить архив с медиафайлами\.",
-        parse_mode = "MarkdownV2"
-    )
+    MessageBoxObject.send(Message.chat.id, "greeting", "info")
+    
 
 #=========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ STATISTICS <<<<< #
