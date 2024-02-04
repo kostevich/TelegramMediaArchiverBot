@@ -105,7 +105,6 @@ def ProcessCommandArchive(Message: types.Message):
     else:
         # Отправка сообщения.
         MessageBoxObject.send(Message.chat.id, "expectation", "waiting")
-       
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #

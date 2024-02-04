@@ -48,7 +48,7 @@ class Flow:
         self.CheckEmptyThread = self.EmptyFlowStatus
 
         # Настройки.
-        self.Settings = Settings
+        self.__Settings = Settings.copy()
 
     #==========================================================================================#
     # >>>>> ДОБАВЛЕНИЕ ФАЙЛА В ОЧЕРЕДЬ МЕДИАФАЙЛОВ <<<<< #
@@ -112,7 +112,7 @@ class Flow:
                 FileType = "." + File.file_path.split('.')[-1]
 
                 # Загрузка файла.
-                Response = requests.get("https://api.telegram.org/file/bot" + self.Settings["token"] + "/" + f"{File.file_path}")
+                Response = requests.get("https://api.telegram.org/file/bot" + self.__Settings["token"] + "/" + f"{File.file_path}")
 
                 # Сохранение файла.
                 with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
