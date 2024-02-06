@@ -83,7 +83,7 @@ def ProcessCommandArchive(Message: types.Message):
 
     else:
         # Отправить инструкции пользователю.
-        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {"reason": "Идёт загрузка файлов."})
+        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {"reason": "Идёт загрузка файлов\."})
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ClEAR <<<<< #

@@ -4,6 +4,7 @@
 #==========================================================================================#
 
 from dublib.Methods import RemoveFolderContent, ReadJSON
+from .MessageBox import MessageBox
 
 
 import datetime
@@ -11,14 +12,14 @@ import logging
 import telebot
 import shutil
 import os
-        
+
 #==========================================================================================#
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
 def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any, FlowObject):
-    # Текст сообщения.
-    MessageText = "📊 *Статистика* \n\n"
+    # Создание объекта класса MessageBox.
+    MessageBoxObject = MessageBox(Bot = Bot)
 
     # Список названий файлов в директории пользователя.
     Files = os.listdir("Data/Files/" + str(UserID))
@@ -63,30 +64,23 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
             FileTypes["document"] +=1
 
     # Добавление статистики.
-    MessageText += "⏳ *Количество загружаемых файлов*\: " + str(FlowObject.CountMessagesBufer()) + "\n" + "\n"
-
-    try:
-        MessageText += "📦 *Текущий размер архива*\: " + str(SizeObject.Converter("Any", Size)).replace('.','\.') + "\n" + "\n"
-    except:
-        MessageText += "📦 *Текущий размер архива*\: " + "0B" + "\n" + "\n"
-
-    MessageText += "🗄 *_Типы файлов_*\: " + "\n" + "\n"
-
-    MessageText += "📷 _Фото_\: " + str(FileTypes["photo"]) + "\n"
-    MessageText += "📽 _Видео_\: " + str(FileTypes["video"]) + "\n"
-    MessageText += "💼 _Документы_\: " + str(FileTypes["document"]) + "\n"
-    MessageText += "🎵 _Аудио_\: " + str(FileTypes["audio"]) + "\n" + "\n"
-
-    MessageText += "❌ *_Ошибки_*\: "  + str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
+    count = str(FlowObject.CountMessagesBufer())
+    size = str(SizeObject.Converter("Any", Size))
+    photo = str(FileTypes["photo"])
+    video = str(FileTypes["video"])
+    documents = str(FileTypes["document"])
+    audio = str(FileTypes["audio"])
+    mistakes = str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
     
     # Отправка статистики.
-    Bot.send_message(ChatID, MessageText, parse_mode = "MarkdownV2")
-
+    MessageBoxObject.send(ChatID, "statistic", "statistic", {"count": count, "size": size, "photo": photo, "video": video, "documents": documents, "audio": audio, "mistakes": mistakes})
 #==========================================================================================#
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
 def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: any):
+    # Создание объекта класса MessageBox.
+    MessageBoxObject = MessageBox(Bot = Bot)
 
     # Получение текущей даты.
     Date = datetime.datetime.now()
@@ -101,7 +95,7 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: 
     while len(os.listdir("Data/Files/" + UserID)) > 0:
 
         # Отправка сообщений пользователю.
-        Bot.send_message(ChatID, "⏳ Сборка\n\n Идёт упаковка архива...")
+        MessageBoxObject.send(ChatID, "archiving", "waiting")
 
         # Архивирование файлов пользователя.
         shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
@@ -125,10 +119,9 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: 
         try: 
             # Получение списка словарей незагруженных файлов.
             UnloadedFiles = UserDataObject.GetInfo(UserID, "UnloadedFiles")
-            # print(UnloadedFiles[0])
 
             # Отправка сообщения.
-            Bot.send_message(ChatID,"⏳ Сборка\n\n Отправление файлов, которые были незагружены..." )
+            MessageBoxObject.send(ChatID, "mistakes","waiting",)
             
             for Sequence in range(len(UnloadedFiles)):
                 

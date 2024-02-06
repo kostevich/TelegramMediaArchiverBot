@@ -63,18 +63,18 @@ class Sizer:
         if Unit == "Any":
             if Value < 1024:
                 # Перевод в байты.
-                ResultConvertation = str(round(Value, 1)) + self.Units[0]
+                ResultConvertation = str(int(Value)) +' '+ self.Units[0]
 
             # Перевод в килобайты.
             if Value > 1024:
-                ResultConvertation = str(round(Value/1024, 1)) + self.Units[1]
+                ResultConvertation = str(int(Value/1024)) +' '+ self.Units[1]
 
             if Value/1024 > 1024:
-                    ResultConvertation = str(round(Value/1048576, 1)) + self.Units[2]
+                    ResultConvertation = str(int(Value/1048576)) +' '+ self.Units[2]
 
             # Перевод в гигабайты.
             if Value/1024/1024 > 1024:
-                ResultConvertation = str(round(Value/1048576/1024, 1)) + self.Units[3]
+                ResultConvertation = str(int(Value/1048576/1024)) +' '+ self.Units[3]
 
         return ResultConvertation
     
