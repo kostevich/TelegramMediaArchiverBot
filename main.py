@@ -99,6 +99,9 @@ def ProcessCommandArchive(Message: types.Message):
         # Удаление файлов пользователя.
         RemoveFolderContent("Data/Files/" + UserDataObject.GetUserID())
 
+        #Удаление незагруженных файлов в json.
+        UserDataObject.UpdateUser("UnloadedFiles", [], "Update")
+
         # Отправка сообщения.
         MessageBoxObject.send(Message.chat.id, "wellclear", "done")
 
@@ -134,32 +137,45 @@ def ProcessCommandStatistics(Message: types.Message):
 
 @Bot.message_handler(content_types=["photo", "video", "audio", "document"])
 def ProcessFileUpload(Message: types.Message):
+    # Состояние загрузки файла.
+    Loading = list()
+
     # Запрос данных пользователя.
     UserDataObject = UserData(Message.from_user.id)
     
     # ID файла.
     FileID = None
 
+    # UniqueID файла.
+    UniqueID = None
+
+    # Тип файла.
+    Type = Message.content_type
+
     # Если тип файла – фото.
     if Message.content_type == "photo":
         FileID = Message.photo[-1].file_id
+        UniqueID = Message.photo[-1].file_unique_id
 
     # Если тип файла – видео.
     elif Message.content_type == "video":
         FileID = Message.video.file_id
+        UniqueID = Message.video.file_unique_id
 
     # Если тип файла – аудио.
     elif Message.content_type == "audio":
         FileID = Message.audio.file_id
+        UniqueID = Message.audio.file_unique_id
 
     # Если тип файла – документ.
     elif Message.content_type == "document":
-        FileID = Message.document.file_id     
+        FileID = Message.document.file_id
+        UniqueID = Message.document.file_unique_id
  
     try:
         # Получение данных файла. 
         FileInfo = Bot.get_file(FileID)
-        
+
         # Логгирование.
         logging.info("Получены данные файла.")
         
@@ -180,20 +196,39 @@ def ProcessFileUpload(Message: types.Message):
     
             else:
                 # Добавление незагруженных файлов.
-                UserDataObject.UpdateUser("UnloadedFiles", {
-                "file": FileID,
-                "userid": UserDataObject.GetUserID(), 
-                "type": Message.content_type
-
-            }, "Add")
+                    UserDataObject.UpdateUser("UnloadedFiles", {
+                    "idfile": FileID,
+                    "uniqueidfile":UniqueID,
+                    "userid": UserDataObject.GetUserID(), 
+                    "type": Message.content_type
+                    }, "Add")
 
     except: 
-        # Добавление незагруженных файлов.
-        UserDataObject.UpdateUser("UnloadedFiles", {
-                "file": FileID,
-                "userid": UserDataObject.GetUserID(), 
-                "type": Message.content_type
+        UnploadedFiles = UserDataObject.GetInfo(UserDataObject.GetUserID(), "UnloadedFiles")
+        print(UnploadedFiles)
+        if UnploadedFiles == {}:
+            # Добавление незагруженных файлов.
+            UserDataObject.UpdateUser("UnloadedFiles", {
+            "idfile": FileID,
+            "uniqueidfile":UniqueID,
+            "userid": UserDataObject.GetUserID(), 
+            "type": Message.content_type
             }, "Add")
+        else:
+            for i in UnploadedFiles:
+                if i["uniqueidfile"] == UniqueID:
+                    logging.info("Такой фaйл уже есть в незагруженных файлах.")
+
+                else:
+                    # Добавление незагруженных файлов.
+                    UserDataObject.UpdateUser("UnloadedFiles", {
+                    "idfile": FileID,
+                    "uniqueidfile":UniqueID,
+                    "userid": UserDataObject.GetUserID(), 
+                    "type": Message.content_type
+                    }, "Add")
+
+
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

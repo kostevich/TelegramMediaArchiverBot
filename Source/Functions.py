@@ -121,30 +121,45 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: 
             UnloadedFiles = UserDataObject.GetInfo(UserID, "UnloadedFiles")
 
             # Отправка сообщения.
-            MessageBoxObject.send(ChatID, "mistakes","waiting",)
+            MessageBoxObject.send(ChatID, "mistakes", "waiting")
+
+            # Получение длины списка словарей незагруженных файлов.
+            Lenth = len(UnloadedFiles)
             
-            for Sequence in range(len(UnloadedFiles)):
+            for Sequence in range(Lenth):
                 
                 if UnloadedFiles[0]["type"] == "document": 
                     # Отправка файлов, которые невозможно скачать.
-                    Bot.send_document(ChatID, document = UnloadedFiles[0]["file"])
+                    Bot.send_document(ChatID, document = UnloadedFiles[0]["idfile"])
+                    print(UnloadedFiles)
                     del UnloadedFiles[0]
-  
+                    print(UnloadedFiles)
+                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
+                
                 if UnloadedFiles[0]["type"] == "audio":  
                     # Отправка файлов, которые невозможно скачать.
-                    Bot.send_audio(ChatID, audio = UnloadedFiles[0]["file"])
+                    Bot.send_audio(ChatID, audio = UnloadedFiles[0]["idfile"])
+                    print(UnloadedFiles)
                     del UnloadedFiles[0]
-
+                    print(UnloadedFiles)
+                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
+                
                 if UnloadedFiles[0]["type"] == "video": 
                     # Отправка файлов, которые невозможно скачать.
-                    Bot.send_video(ChatID, video = UnloadedFiles[0]["file"])
-                    del UnloadedFiles[0] 
-
+                    Bot.send_video(ChatID, video = UnloadedFiles[0]["idfile"])
+                    print(UnloadedFiles)
+                    del UnloadedFiles[0]
+                    print(UnloadedFiles)
+                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
+                     
                 if UnloadedFiles[0]["type"] == "photo": 
                     # Отправка файлов, которые невозможно скачать.
-                    Bot.send_photo(ChatID, photo = UnloadedFiles[0]["file"])
+                    Bot.send_photo(ChatID, photo = UnloadedFiles[0]["idfile"])
+                    print(UnloadedFiles)
                     del UnloadedFiles[0]
-             
+                    print(UnloadedFiles)
+                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
+                    
         except:
             # Логгирование.
             logging.info("Отправка файла не удалась")
