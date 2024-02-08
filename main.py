@@ -5,8 +5,8 @@
 
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
 from Source.Functions import GenerateStatistics, SendArchive
+from Source.Users import UsersManager
 from Source.MessageBox import MessageBox
-from Source.UserData import UserData
 from Source.Sizer import Sizer
 from Source.Flow import Flow
 from telebot import types
@@ -65,19 +65,22 @@ SizerObject = Sizer()
 # Создание объекта класса MessageBox.
 MessageBoxObject = MessageBox(Bot = Bot)
 
+#Создание объекта класса UsersManager.
+UsersManagerObject = UsersManager()
+
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ARCHIVE <<<<< #
 #==========================================================================================#
 
 @Bot.message_handler(commands=["archive"])
 def ProcessCommandArchive(Message: types.Message):
-    # Запрос данных пользователя.
-    UserDataObject = UserData(Message.from_user.id)
-
+    # Авторизация пользователя.
+    UsersManagerObject.auth(Message.from_user)
+    
     # Если очередь отправки файлов пуста.
     if FlowObject.EmptyFlowStatus() == True:
         # Если не удалась отправка архива.
-        if SendArchive(Bot, UserDataObject.GetUserID(), Message.chat.id, UserDataObject) == False:
+        if SendArchive(Bot, Message.from_user.id, Message.chat.id, UsersManagerObject) == False:
             # Отправка сообщения: пользователь не отправил ни одного файла.
             MessageBoxObject.send(Message.chat.id, "no-files", "error")
 
@@ -90,24 +93,24 @@ def ProcessCommandArchive(Message: types.Message):
 #==========================================================================================#
 
 @Bot.message_handler(commands=["clear"])
-def ProcessCommandArchive(Message: types.Message):
-    # Запрос данных пользователя.
-    UserDataObject = UserData(Message.from_user.id)
+def ProcessCommandClear(Message: types.Message):
+    # Авторизация пользователя.
+    UsersManagerObject.auth(Message.from_user)
 
     # Есть ли файлы пользователя в потоке.
-    if FlowObject.CheckUserFilesPresence(UserDataObject.GetUserID()) == False:
+    if FlowObject.CheckUserFilesPresence(Message.from_user.id) == False:
         # Удаление файлов пользователя.
-        RemoveFolderContent("Data/Files/" + UserDataObject.GetUserID())
+        RemoveFolderContent("Data/Files/" +str(Message.from_user.id))
 
-        #Удаление незагруженных файлов в json.
-        UserDataObject.UpdateUser("UnloadedFiles", [], "Update")
+        # Удаление незагруженных файлов в json.
+        UsersManagerObject.set_user_value(Message.from_user.id, "UnloadedFiles", [])
 
         # Отправка сообщения.
         MessageBoxObject.send(Message.chat.id, "wellclear", "done")
 
     else:
         # Отправка сообщения.
-        MessageBoxObject.send(Message.chat.id, "expectation", "waiting")
+        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {'reason': 'Не все ваши файлы загружены\\.'})
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ START <<<<< #
@@ -115,6 +118,9 @@ def ProcessCommandArchive(Message: types.Message):
 
 @Bot.message_handler(commands=["start"])
 def ProcessCommandStart(Message: types.Message):
+    # Авторизация пользователя.
+    UsersManagerObject.auth(Message.from_user)
+
     # Отправка приветствия.
     MessageBoxObject.send(Message.chat.id, "greeting", "info")
     
@@ -125,11 +131,11 @@ def ProcessCommandStart(Message: types.Message):
 
 @Bot.message_handler(commands=["statistics"])
 def ProcessCommandStatistics(Message: types.Message):
-    # Запрос данных пользователя.
-    UserDataObject = UserData(Message.from_user.id)
+    # Авторизация пользователя.
+    UsersManagerObject.auth(Message.from_user)
 
     # Отправка статистики медиафайлов.
-    GenerateStatistics(Bot, UserDataObject.GetUserID(), Message.chat.id, SizerObject, FlowObject)
+    GenerateStatistics(Bot, Message.from_user.id, Message.chat.id, SizerObject, FlowObject, UsersManagerObject)
 
 #=========================================================================================#
 # >>>>> ОБРАБОТЧИК МЕДИАФАЙЛОВ <<<<< #
@@ -137,20 +143,14 @@ def ProcessCommandStatistics(Message: types.Message):
 
 @Bot.message_handler(content_types=["photo", "video", "audio", "document"])
 def ProcessFileUpload(Message: types.Message):
-    # Состояние загрузки файла.
-    Loading = list()
-
-    # Запрос данных пользователя.
-    UserDataObject = UserData(Message.from_user.id)
+    # Авторизация пользователя.
+    UsersManagerObject.auth(Message.from_user)
     
     # ID файла.
     FileID = None
 
     # UniqueID файла.
     UniqueID = None
-
-    # Тип файла.
-    Type = Message.content_type
 
     # Если тип файла – фото.
     if Message.content_type == "photo":
@@ -181,39 +181,30 @@ def ProcessFileUpload(Message: types.Message):
         
         # Если размер файла меньше 20 MB.
         if SizerObject.CheckSize(FileInfo) == True:
+
             # Размер всех файлов, которые будут скачаны.
-            UpdatingSize = UserDataObject.GetInfo(UserDataObject.GetUserID(), "Size") + SizerObject.Converter("KB", FileInfo.file_size)
+            UpdatingSize = UsersManagerObject.get_user(Message.from_user.id).size + SizerObject.Converter("KB", FileInfo.file_size)
             
             # Если размер всех скачанных файлов меньше 20 MB.
             if UpdatingSize < 20480:
                 # Запись в json.
-                UserDataObject.UpdateUser("Size", UpdatingSize, "Update")
+                UsersManagerObject.add_size(Message.from_user.id, SizerObject.Converter("KB", FileInfo.file_size))
                
                 # Добавление файла в очередь.
-                FlowObject.AddFileInfo(FileInfo, UserDataObject)
+                FlowObject.AddFileInfo(FileInfo, Message.from_user.id)
                 
                 logging.info("Файл добавлен в очередь.")
     
             else:
                 # Добавление незагруженных файлов.
-                    UserDataObject.UpdateUser("UnloadedFiles", {
-                    "idfile": FileID,
-                    "uniqueidfile":UniqueID,
-                    "userid": UserDataObject.GetUserID(), 
-                    "type": Message.content_type
-                    }, "Add")
+                UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
 
     except: 
-        UnploadedFiles = UserDataObject.GetInfo(UserDataObject.GetUserID(), "UnloadedFiles")
-        print(UnploadedFiles)
-        if UnploadedFiles == {}:
+        UnploadedFiles = UsersManagerObject.get_user(Message.from_user.id).unloaded_files 
+        
+        if UnploadedFiles == []:
             # Добавление незагруженных файлов.
-            UserDataObject.UpdateUser("UnloadedFiles", {
-            "idfile": FileID,
-            "uniqueidfile":UniqueID,
-            "userid": UserDataObject.GetUserID(), 
-            "type": Message.content_type
-            }, "Add")
+            UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
         else:
             for i in UnploadedFiles:
                 if i["uniqueidfile"] == UniqueID:
@@ -221,14 +212,7 @@ def ProcessFileUpload(Message: types.Message):
 
                 else:
                     # Добавление незагруженных файлов.
-                    UserDataObject.UpdateUser("UnloadedFiles", {
-                    "idfile": FileID,
-                    "uniqueidfile":UniqueID,
-                    "userid": UserDataObject.GetUserID(), 
-                    "type": Message.content_type
-                    }, "Add")
-
-
+                    UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)

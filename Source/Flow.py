@@ -54,12 +54,12 @@ class Flow:
     # >>>>> ДОБАВЛЕНИЕ ФАЙЛА В ОЧЕРЕДЬ МЕДИАФАЙЛОВ <<<<< #
     #==========================================================================================#   
                    
-    def AddFileInfo(self, FileInfo: any, UserDataObject: any):
+    def AddFileInfo(self, FileInfo: any, UserID: int):
         # Добавление файла в список.
         self.__MessagesBufer.append(
             {
                 "File": FileInfo,
-                "User": UserDataObject.GetUserID()
+                "User": UserID
             }
         )
 
@@ -101,19 +101,23 @@ class Flow:
             User = self.__MessagesBufer[0]["User"]
 
             # Если такой же файл найден.
-            if os.path.exists(f"Data\Files\{User}\{File.file_unique_id}.{File.file_path.split('.')[1]}"):
+            if os.path.exists(f"Data\Files\{User}\{File.file_unique_id}.{File.file_path.split('.')[-1]}"):
                 logging.info("Файл идентичен уже имеющемуся")
 
                 # Удаление элемента из списка.
                 self.__MessagesBufer.pop(0)
 
             else:
-                # Расширение файла.
-                FileType = "." + File.file_path.split('.')[-1]
-
                 # Загрузка файла.
                 Response = requests.get("https://api.telegram.org/file/bot" + self.__Settings["token"] + "/" + f"{File.file_path}")
 
+                if str(File.file_path).find('.') == -1:
+                    FileType = ''
+
+                else: 
+                    # Расширение файла.
+                    FileType = "." + File.file_path.split('.')[-1]
+                    
                 # Сохранение файла.
                 with open(f"Data/Files/{User}/" + str(File.file_unique_id) + FileType, "wb") as FileWriter:
                     FileWriter.write(Response.content)
@@ -124,9 +128,9 @@ class Flow:
                     # Удаление элемента из списка.
                     self.__MessagesBufer.pop(0)
                     
-        except:
+        except Exception as ExceptionData:
             # Логгирование.
-            logging.error("Не получилось загрузить файл.") 
+            logging.error(f"Не получилось загрузить файл. {ExceptionData}") 
 
     #==========================================================================================#
     # >>>>> ПРОВЕРКА ПУСТОТЫ ПОТОКА <<<<< #

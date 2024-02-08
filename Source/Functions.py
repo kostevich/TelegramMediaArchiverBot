@@ -5,6 +5,7 @@
 
 from dublib.Methods import RemoveFolderContent, ReadJSON
 from .MessageBox import MessageBox
+from Source.Users import UsersManager
 
 
 import datetime
@@ -17,7 +18,7 @@ import os
 # >>>>> ОТПРАВКА СТАТИСТИКИ <<<<< #
 #==========================================================================================#
 
-def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any, FlowObject):
+def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObject: any, FlowObject, UsersManagerObject):
     # Создание объекта класса MessageBox.
     MessageBoxObject = MessageBox(Bot = Bot)
 
@@ -64,21 +65,22 @@ def GenerateStatistics(Bot: telebot.TeleBot, UserID: str, ChatID: int, SizeObjec
             FileTypes["document"] +=1
 
     # Добавление статистики.
-    count = str(FlowObject.CountMessagesBufer())
-    size = str(SizeObject.Converter("Any", Size))
-    photo = str(FileTypes["photo"])
-    video = str(FileTypes["video"])
-    documents = str(FileTypes["document"])
-    audio = str(FileTypes["audio"])
-    mistakes = str(len(ReadJSON("Data/Users/" + UserID + ".json")["UnloadedFiles"]))
+    count = FlowObject.CountMessagesBufer()
+    size = SizeObject.Converter("Any", Size)
+    photo = FileTypes["photo"]
+    video = FileTypes["video"]
+    documents = FileTypes["document"]
+    audio = FileTypes["audio"]
+    mistakes = len(UsersManagerObject.get_user(UserID).unloaded_files)
     
     # Отправка статистики.
     MessageBoxObject.send(ChatID, "statistic", "statistic", {"count": count, "size": size, "photo": photo, "video": video, "documents": documents, "audio": audio, "mistakes": mistakes})
+    
 #==========================================================================================#
 # >>>>> ОТПРАВКА АРХИВА  <<<<< #
 #==========================================================================================#
 
-def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: any):
+def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObject: UsersManager):
     # Создание объекта класса MessageBox.
     MessageBoxObject = MessageBox(Bot = Bot)
 
@@ -118,7 +120,7 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: 
 
         try: 
             # Получение списка словарей незагруженных файлов.
-            UnloadedFiles = UserDataObject.GetInfo(UserID, "UnloadedFiles")
+            UnloadedFiles = UsersManagerObject.get_user(UserID).unloaded_files
 
             # Отправка сообщения.
             MessageBoxObject.send(ChatID, "mistakes", "waiting")
@@ -131,34 +133,21 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UserDataObject: 
                 if UnloadedFiles[0]["type"] == "document": 
                     # Отправка файлов, которые невозможно скачать.
                     Bot.send_document(ChatID, document = UnloadedFiles[0]["idfile"])
-                    print(UnloadedFiles)
-                    del UnloadedFiles[0]
-                    print(UnloadedFiles)
-                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
                 
                 if UnloadedFiles[0]["type"] == "audio":  
                     # Отправка файлов, которые невозможно скачать.
                     Bot.send_audio(ChatID, audio = UnloadedFiles[0]["idfile"])
-                    print(UnloadedFiles)
-                    del UnloadedFiles[0]
-                    print(UnloadedFiles)
-                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
-                
+                    
                 if UnloadedFiles[0]["type"] == "video": 
                     # Отправка файлов, которые невозможно скачать.
                     Bot.send_video(ChatID, video = UnloadedFiles[0]["idfile"])
-                    print(UnloadedFiles)
-                    del UnloadedFiles[0]
-                    print(UnloadedFiles)
-                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
                      
                 if UnloadedFiles[0]["type"] == "photo": 
                     # Отправка файлов, которые невозможно скачать.
                     Bot.send_photo(ChatID, photo = UnloadedFiles[0]["idfile"])
-                    print(UnloadedFiles)
-                    del UnloadedFiles[0]
-                    print(UnloadedFiles)
-                    UserDataObject.UpdateUser("UnloadedFiles", UnloadedFiles, "Update")
+                
+                # Удаление словаря ошибок отправленного файла.
+                UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
                     
         except:
             # Логгирование.

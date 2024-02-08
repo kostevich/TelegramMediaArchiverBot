@@ -74,7 +74,7 @@ class UsersManager:
 		# Сохранение файла.
 		self.__SaveUser(UserID)
 
-		return UserData(self.__Users[UserID])
+		return UserData(UserID, self.__Users[UserID])
 
 	def __LoadUsers(self):
 		"""Загружает данные пользователей."""
@@ -87,7 +87,7 @@ class UsersManager:
 		# Для каждого файла.
 		for File in Files:
 			# Чтение файла.
-			Bufer = ReadJSON(f"Dta/Users/{File}")
+			Bufer = ReadJSON(f"Data/Users/{File}")
 			# ID пользователя.
 			UserID = int(File.replace(".json", ""))
 			# Запись пользовательских данных.
@@ -97,7 +97,7 @@ class UsersManager:
 		"""Сохраняет файл пользователя."""
 		
 		# Сохранение файла.
-		WriteJSON(self.__Users[UserID], f"Data/Users/{UserID}.json")
+		WriteJSON(f"Data/Users/{UserID}.json", self.__Users[UserID])
 
 	def __init__(self):
 		"""Менеджер пользователей."""
@@ -107,9 +107,9 @@ class UsersManager:
 		# Словарь пользователей.
 		self.__Users = dict()
 
-	def auth(self, user: telebot.User) -> UserData:
+	def auth(self, user: telebot.types.User) -> UserData:
 		"""
-		Выполняет идентификацию пользователя. Возвращает словарь описательных данных.
+		Выполняет идентификацию пользователя. Возвращает объектное представление данных пользователя.
 			user – данные пользователя.
 		"""
 
@@ -138,7 +138,7 @@ class UsersManager:
 		# Пользователь.
 		User = None
 		# Если пользователь уже зарегестрирован в системе, записать его данные.
-		if user_id in self.__Users.keys(): User = UserData(self.__Users[user_id])
+		if user_id in self.__Users.keys(): User = UserData(user_id, self.__Users[user_id])
 		
 		return User
 
@@ -152,7 +152,7 @@ class UsersManager:
 		user_id = int(user_id)
 		# Пользователь.
 		User = None
-		# Если пользователь уже зарегестрирован в системе, записать его данные.
+		# Если пользователь уже зарегистрирован в системе, записать его данные.
 		if user_id in self.__Users.keys(): User = self.__Users[user_id]
 
 		return User
@@ -236,8 +236,8 @@ class UsersManager:
 			del self.__Users[user_id]
 			# Удаление файлов и директорий пользователя.
 			if os.path.exists(f"Data/Users/{user_id}.json") == True: os.remove(f"Data/Users/{user_id}.json")
-			if os.path.exists(f"Data/Files/{UserID}") == True: os.rmdir(f"Data/Files/{UserID}")
-			if os.path.exists(f"Data/Archives/{UserID}") == True: os.rmdir(f"Data/Files/{UserID}")
+			if os.path.exists(f"Data/Files/{user_id}") == True: os.rmdir(f"Data/Files/{user_id}")
+			if os.path.exists(f"Data/Archives/{user_id}") == True: os.rmdir(f"Data/Files/{user_id}")
 			# Переключение состояния.
 			IsSuccess = True
 
