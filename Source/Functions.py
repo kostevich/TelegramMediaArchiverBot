@@ -3,10 +3,11 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
+from telebot.types import InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo
 from dublib.Methods import RemoveFolderContent, ReadJSON
-from .MessageBox import MessageBox
 from Source.Users import UsersManager
-
+from .MessageBox import MessageBox
+from telebot import types
 
 import datetime
 import logging
@@ -94,16 +95,16 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
     IsSended = False
 
     # Если существуют файлы для архивации.
-    while len(os.listdir("Data/Files/" + UserID)) > 0:
+    while len(os.listdir("Data/Files/" + str(UserID))) > 0:
 
         # Отправка сообщений пользователю.
         MessageBoxObject.send(ChatID, "archiving", "waiting")
 
         # Архивирование файлов пользователя.
-        shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + UserID)
+        shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + str(UserID))
 
         # Очистка файлов пользователя. 
-        RemoveFolderContent("Data/Files/" + UserID)
+        RemoveFolderContent("Data/Files/" + str(UserID))
 
         # Бинарное содержимое архива.
         BinaryArchive = None
@@ -122,39 +123,48 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
             # Получение списка словарей незагруженных файлов.
             UnloadedFiles = UsersManagerObject.get_user(UserID).unloaded_files
 
-            # Отправка сообщения.
-            MessageBoxObject.send(ChatID, "mistakes", "waiting")
-
             # Получение длины списка словарей незагруженных файлов.
             Lenth = len(UnloadedFiles)
+        
+            print(Lenth)
             
-            for Sequence in range(Lenth):
+
+            if Lenth > 0:
+                # Отправка сообщения.
+                MessageBoxObject.send(ChatID, "mistakes", "waiting")
+                if UnloadedFiles[0]["type"] == "video":
+                    Media += types.InputMediaVideo(UnloadedFiles[0]["idfile"])
+# {"type": "photo", "media": open('test2.jpg', mode='rb')}]
+#             for Sequence in range(Lenth):
+#                 [{"type": "photo", "media": open('test1.jpg', mode='rb')},
+# {"type": "photo", "media": open('test2.jpg', mode='rb')}]
+#                 if UnloadedFiles[0]["type"] == "document": 
+
+#                     InputMediaAudio.append({"type": "document", "media": UnloadedFiles[0]["idfile"]})
                 
-                if UnloadedFiles[0]["type"] == "document": 
-                    # Отправка файлов, которые невозможно скачать.
-                    Bot.send_document(ChatID, document = UnloadedFiles[0]["idfile"])
-                
-                if UnloadedFiles[0]["type"] == "audio":  
-                    # Отправка файлов, которые невозможно скачать.
-                    Bot.send_audio(ChatID, audio = UnloadedFiles[0]["idfile"])
-                    
-                if UnloadedFiles[0]["type"] == "video": 
-                    # Отправка файлов, которые невозможно скачать.
-                    Bot.send_video(ChatID, video = UnloadedFiles[0]["idfile"])
+#                 if UnloadedFiles[0]["type"] == "audio":  
+
+#                     Media[0].append({"type": "audio", "media": UnloadedFiles[0]["idfile"]})
+
+#                 if UnloadedFiles[0]["type"] == "video": 
+
+#                     Media[0]["InputMediaVideo"].append({"type": "video", "media": UnloadedFiles[0]["idfile"]})
                      
-                if UnloadedFiles[0]["type"] == "photo": 
-                    # Отправка файлов, которые невозможно скачать.
-                    Bot.send_photo(ChatID, photo = UnloadedFiles[0]["idfile"])
+#                 if UnloadedFiles[0]["type"] == "photo": 
+
+#                     Media["InputMediaPhoto"].append({"type": "photo", "media": UnloadedFiles[0]["idfile"]})
+
                 
                 # Удаление словаря ошибок отправленного файла.
+                Bot.send_media_group(ChatID, Media)
                 UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
                     
-        except:
+        except TypeError as ExceptionData:
             # Логгирование.
-            logging.info("Отправка файла не удалась")
+            logging.info(f"Отправка файла не удалась. {ExceptionData}")
        
         # Очистка архивов пользователя. 
-        RemoveFolderContent("Data/Archives/" + UserID)
+        RemoveFolderContent("Data/Archives/" + str(UserID))
         
         # Переключение состояния.
         IsSended = True
