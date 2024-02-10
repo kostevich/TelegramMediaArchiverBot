@@ -125,39 +125,37 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 
             # Получение длины списка словарей незагруженных файлов.
             Lenth = len(UnloadedFiles)
-        
-            print(Lenth)
             
-
+            Media = list()
             if Lenth > 0:
                 # Отправка сообщения.
                 MessageBoxObject.send(ChatID, "mistakes", "waiting")
-                if UnloadedFiles[0]["type"] == "video":
-                    Media += types.InputMediaVideo(UnloadedFiles[0]["idfile"])
-# {"type": "photo", "media": open('test2.jpg', mode='rb')}]
-#             for Sequence in range(Lenth):
-#                 [{"type": "photo", "media": open('test1.jpg', mode='rb')},
-# {"type": "photo", "media": open('test2.jpg', mode='rb')}]
-#                 if UnloadedFiles[0]["type"] == "document": 
-
-#                     InputMediaAudio.append({"type": "document", "media": UnloadedFiles[0]["idfile"]})
+                for Sequence in range(Lenth):
+                    if UnloadedFiles[Sequence]["type"] == "video":
+                    
+                        Media.append(InputMediaVideo(media = UnloadedFiles[Sequence]["idfile"]))
                 
-#                 if UnloadedFiles[0]["type"] == "audio":  
+                
+                    if UnloadedFiles[0]["type"] == "document": 
 
-#                     Media[0].append({"type": "audio", "media": UnloadedFiles[0]["idfile"]})
+                        Media.append(InputMediaAudio.append({"type": "document", "media": UnloadedFiles[0]["idfile"]})
+                
+                    if UnloadedFiles[0]["type"] == "audio":  
 
-#                 if UnloadedFiles[0]["type"] == "video": 
+                        Media[0].append({"type": "audio", "media": UnloadedFiles[0]["idfile"]})
 
-#                     Media[0]["InputMediaVideo"].append({"type": "video", "media": UnloadedFiles[0]["idfile"]})
+                    if UnloadedFiles[0]["type"] == "video": 
+
+                        Media[0]["InputMediaVideo"].append({"type": "video", "media": UnloadedFiles[0]["idfile"]})
                      
-#                 if UnloadedFiles[0]["type"] == "photo": 
+                    if UnloadedFiles[0]["type"] == "photo": 
 
-#                     Media["InputMediaPhoto"].append({"type": "photo", "media": UnloadedFiles[0]["idfile"]})
+                        Media["InputMediaPhoto"].append({"type": "photo", "media": UnloadedFiles[0]["idfile"]})
 
                 
                 # Удаление словаря ошибок отправленного файла.
                 Bot.send_media_group(ChatID, Media)
-                UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
+                # UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
                     
         except TypeError as ExceptionData:
             # Логгирование.

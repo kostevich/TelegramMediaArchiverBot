@@ -208,7 +208,7 @@ def ProcessFileUpload(Message: types.Message):
         else:
             for i in UnploadedFiles:
                 if i["uniqueidfile"] == UniqueID:
-                    logging.info("Такой фaйл уже есть в незагруженных файлах.")
+                    logging.info ("Такой фaйл уже есть в незагруженных файлах.")
 
                 else:
                     # Добавление незагруженных файлов.
