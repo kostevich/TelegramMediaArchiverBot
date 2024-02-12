@@ -135,27 +135,21 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
                     
                         Media.append(InputMediaVideo(media = UnloadedFiles[Sequence]["idfile"]))
                 
+                    if UnloadedFiles[Sequence]["type"] == "document": 
+
+                        Media.append(InputMediaDocument(media = UnloadedFiles[Sequence]["idfile"]))
                 
-                    if UnloadedFiles[0]["type"] == "document": 
+                    if UnloadedFiles[Sequence]["type"] == "audio":  
 
-                        Media.append(InputMediaAudio.append({"type": "document", "media": UnloadedFiles[0]["idfile"]})
-                
-                    if UnloadedFiles[0]["type"] == "audio":  
+                        Media.append(InputMediaAudio(media = UnloadedFiles[Sequence]["idfile"]))
 
-                        Media[0].append({"type": "audio", "media": UnloadedFiles[0]["idfile"]})
+                    if UnloadedFiles[Sequence]["type"] == "photo": 
 
-                    if UnloadedFiles[0]["type"] == "video": 
+                        Media.append(InputMediaVideo(media = UnloadedFiles[Sequence]["idfile"]))
 
-                        Media[0]["InputMediaVideo"].append({"type": "video", "media": UnloadedFiles[0]["idfile"]})
-                     
-                    if UnloadedFiles[0]["type"] == "photo": 
-
-                        Media["InputMediaPhoto"].append({"type": "photo", "media": UnloadedFiles[0]["idfile"]})
-
-                
                 # Удаление словаря ошибок отправленного файла.
                 Bot.send_media_group(ChatID, Media)
-                # UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
+                UsersManagerObject.remove_unloaded_file(UserID, UnloadedFiles[0]["uniqueidfile"])
                     
         except TypeError as ExceptionData:
             # Логгирование.
