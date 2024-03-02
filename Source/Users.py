@@ -59,6 +59,21 @@ class UsersManager:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
+	def __CheckErrorPrescense(self, UserID: int, UniquieID: str) -> bool:
+		"""Проверяет наличие уже описанной ошибки загрузки файла."""
+		# Список ошибок.
+		Errors = self.get_user(UserID).unloaded_files
+		# Список уникальных ID незагруженных файлов.
+		ErrorsUniquieID = list()
+		# Для каждой ошибки записать уникальный ID.
+		for Error in Errors: ErrorsUniquieID.append(Error["uniqueidfile"])
+		# Результат проверки.
+		IsPrescense = False
+		# Если ошибка уже описана, переключить статус.
+		if UniquieID in ErrorsUniquieID: IsPrescense = True
+
+		return IsPrescense
+
 	def __CreateUser(self, UserID: int, Premium: bool) -> UserData:
 		"""Создаёт пользователя."""
 
@@ -297,7 +312,7 @@ class UsersManager:
 				"type": content_type
 			}
 			# Добавление данных о незагруженном файле.
-			if Bufer not in self.__Users[user_id]["UnloadedFiles"]: self.__Users[user_id]["UnloadedFiles"].append(Bufer)
+			if self.__CheckErrorPrescense(user_id, unique_file_id) == False: self.__Users[user_id]["UnloadedFiles"].append(Bufer)
 			# Сохранение файла.
 			self.__SaveUser(user_id)
 			# Переключение состояния.
@@ -322,13 +337,16 @@ class UsersManager:
 
 			# Для каждого незагруженного файла.
 			for Index in range(0, len(self.__Users[user_id]["UnloadedFiles"])):
-				# Если надйен файл с соответствующим уникальным ID, удалить запись о нём.
-				if unique_file_id == self.__Users[user_id]["uniqueidfile"]: self.__Users[user_id]["uniqueidfile"].pop(Index)
-				# Сохранение файла.
-				self.__SaveUser(user_id)
-				# Переключение состояния.
-				IsSuccess = True
-				# Прерывание цикла.
-				break
+
+				# Если надйен файл с соответствующим уникальным ID.
+				if unique_file_id == self.__Users[user_id]["UnloadedFiles"][Index]["uniqueidfile"]:
+					# Удаление записи об ошибке.
+					self.__Users[user_id]["UnloadedFiles"].pop(Index)
+					# Сохранение файла.
+					self.__SaveUser(user_id)
+					# Переключение состояния.
+					IsSuccess = True
+					# Прерывание цикла.
+					break
 
 		return IsSuccess

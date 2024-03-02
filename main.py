@@ -185,8 +185,8 @@ def ProcessFileUpload(Message: types.Message):
             # Размер всех файлов, которые будут скачаны.
             UpdatingSize = UsersManagerObject.get_user(Message.from_user.id).size + SizerObject.Converter("KB", FileInfo.file_size)
             
-            # Если размер всех скачанных файлов меньше 20 MB.
-            if UpdatingSize < 20480:
+            # Условие проверки лимита пользователя (неактивно).
+            if True:
                 # Запись в json.
                 UsersManagerObject.add_size(Message.from_user.id, SizerObject.Converter("KB", FileInfo.file_size))
                

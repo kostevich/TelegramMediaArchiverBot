@@ -114,7 +114,7 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
             BinaryArchive = FileReader.read()
         
         # Отправка архива пользователю.
-        Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+        Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip", timeout = 300)
 
         # Логгирование.
         logging.info("Архив отправлен.")
