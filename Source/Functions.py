@@ -12,6 +12,7 @@ from telebot import types
 import datetime
 import logging
 import telebot
+import zipfile
 import shutil
 import os
 
@@ -100,8 +101,19 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
         # Отправка сообщений пользователю.
         MessageBoxObject.send(ChatID, "archiving", "waiting")
 
-        # Архивирование файлов пользователя.
-        shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + str(UserID))
+        # Создание нового архива.
+        Archieve = zipfile.ZipFile(f'Data/Archives/{UserID}/{Date}.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel = 9)      
+        for root, dirs, files in os.walk(f'Data\Files\{UserID}'): 
+            # Список всех файлов и папок в директории folder.
+            for file in files:
+                print(2)
+                # Создание относительных путей и запись файлов в архив.
+                Archieve.write(os.path.join(root, file))
+        print(3) 
+        Archieve.close()
+        print(4)
+        # # Архивирование файлов пользователя.
+        # shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + str(UserID))
 
         # Очистка файлов пользователя. 
         RemoveFolderContent("Data/Files/" + str(UserID))
@@ -112,9 +124,15 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
         # Чтение архива.
         with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
             BinaryArchive = FileReader.read()
+            print(5)
         
-        # Отправка архива пользователю.
-        Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip", timeout = 300)
+        try:
+            # Отправка архива пользователю.
+            Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
+            print(6)
+        except Exception:
+            MessageBoxObject.send(UserID,"errorsending", "error")
+
 
         # Логгирование.
         logging.info("Архив отправлен.")

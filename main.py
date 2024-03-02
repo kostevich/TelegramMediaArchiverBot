@@ -184,15 +184,15 @@ def ProcessFileUpload(Message: types.Message):
 
             # Размер всех файлов, которые будут скачаны.
             UpdatingSize = UsersManagerObject.get_user(Message.from_user.id).size + SizerObject.Converter("KB", FileInfo.file_size)
-            
-            # Условие проверки лимита пользователя (неактивно).
+
+                        
+            # Условие проверки лимита пользователя (неактивно: UpdatingSize < 20480:).
             if True:
                 # Запись в json.
                 UsersManagerObject.add_size(Message.from_user.id, SizerObject.Converter("KB", FileInfo.file_size))
-               
                 # Добавление файла в очередь.
                 FlowObject.AddFileInfo(FileInfo, Message.from_user.id)
-                
+
                 logging.info("Файл добавлен в очередь.")
     
             else:
@@ -200,8 +200,19 @@ def ProcessFileUpload(Message: types.Message):
                 UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
 
     except: 
-        # Добавление незагруженных файлов.
-        UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
+        UnploadedFiles = UsersManagerObject.get_user(Message.from_user.id).unloaded_files 
+
+        if UnploadedFiles == []:
+            # Добавление незагруженных файлов.
+            UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
+        else:
+            for i in UnploadedFiles:
+                if i["uniqueidfile"] == UniqueID:
+                    logging.info ("Такой фaйл уже есть в незагруженных файлах.")
+
+                else:
+                    # Добавление незагруженных файлов.
+                    UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
 
 # Запуск обработки запросов Telegram.
 Bot.polling(none_stop = True)
