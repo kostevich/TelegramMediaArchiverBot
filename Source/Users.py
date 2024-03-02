@@ -70,7 +70,7 @@ class UsersManager:
 		}
 		# Создание папок пользователей.
 		if os.path.exists(f"Data/Files/{UserID}") == False: os.makedirs(f"Data/Files/{UserID}")
-		if os.path.exists(f"Data/Archives/{UserID}") == False: os.makedirs(f"Data/Files/{UserID}")
+		if os.path.exists(f"Data/Archives/{UserID}") == False: os.makedirs(f"Data/Archives/{UserID}")
 		# Сохранение файла.
 		self.__SaveUser(UserID)
 
@@ -106,6 +106,9 @@ class UsersManager:
 		#==========================================================================================#
 		# Словарь пользователей.
 		self.__Users = dict()
+
+		# Загрузка данных пользователей.
+		self.__LoadUsers()
 
 	def auth(self, user: telebot.types.User) -> UserData:
 		"""
@@ -286,15 +289,15 @@ class UsersManager:
 
 		# Если пользователь идентифицирован.
 		if user_id in self.__Users.keys():
+			# Буфер описания.
+			Bufer = {
+				"userid": user_id,
+				"idfile": file_id,
+				"uniqueidfile": unique_file_id,
+				"type": content_type
+			}
 			# Добавление данных о незагруженном файле.
-			self.__Users[user_id]["UnloadedFiles"].append(
-				{
-					"userid": user_id,
-					"idfile": file_id,
-					"uniqueidfile": unique_file_id,
-					"type": content_type
-				}
-			)
+			if Bufer not in self.__Users[user_id]["UnloadedFiles"]: self.__Users[user_id]["UnloadedFiles"].append(Bufer)
 			# Сохранение файла.
 			self.__SaveUser(user_id)
 			# Переключение состояния.
