@@ -182,8 +182,8 @@ def ProcessFileUpload(Message: types.Message):
         # Если размер файла меньше 20 MB.
         if SizerObject.CheckSize(FileInfo) == True:
 
-            # Размер всех файлов, которые будут скачаны.
-            UpdatingSize = UsersManagerObject.get_user(Message.from_user.id).size + SizerObject.Converter("KB", FileInfo.file_size)
+            # # Размер всех файлов, которые будут скачаны.
+            # UpdatingSize = UsersManagerObject.get_user(Message.from_user.id).size + SizerObject.Converter("KB", FileInfo.file_size)
 
                         
             # Условие проверки лимита пользователя (неактивно: UpdatingSize < 20480:).
@@ -195,9 +195,9 @@ def ProcessFileUpload(Message: types.Message):
 
                 logging.info("Файл добавлен в очередь.")
     
-            else:
-                # Добавление незагруженных файлов.
-                UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
+            # else:
+            #     # Добавление незагруженных файлов.
+            #     UsersManagerObject.add_unloaded_file(Message.from_user.id, FileID, UniqueID, Message.content_type)
 
     except: 
         UnploadedFiles = UsersManagerObject.get_user(Message.from_user.id).unloaded_files 

@@ -3,10 +3,10 @@
 
 # Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
-2. Установить [Python](https://www.python.org/downloads/) версии не старше 3.11. Рекомендуется добавить в PATH.
+2. Установить [Python](https://www.python.org/downloads/) версии не старше 3.10. Рекомендуется добавить в PATH.
 3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI).
 ```
-pip install git+https://github.com/DUB1401/dublib
+pip install dublib
 pip install pyTelegramBotAPI
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
@@ -40,14 +40,19 @@ Archive - archive files and send it.
 # Пример работы
 **Обработка команды start:**
 
-![photo_2023-10-17_21-21-29](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/6451fdcf-2c9c-47d9-9eb9-be94e1f3448f)
+![image](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/584c8560-80bc-4648-9922-ffa8ae17df6c)
 
-**Вывод команд:**
 
-![image_2023-10-17_21-17-26-1](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/8e018e47-fa02-4e67-a56f-4e006c3349f5)
+**Обработка команды statistics:**
 
-**Обработка команды statistics и archive:**
+![image](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/00ca8012-c869-440a-a308-1a893437c2b6)
 
-![image-2](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/ed863b9b-9d90-4f68-923f-9a388d40e695)
+**Обработка команды clear:**
 
-_Copyright © Kostevich Irina. 2023._
+![image](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/43eb152f-bf33-419b-84c6-397ebc24cc02)
+
+**Обработка команды archive:**
+
+![image](https://github.com/kostevich/TelegramMediaArchiverBot/assets/109979502/631ce178-5d5f-47a4-a4da-80dd4103661b)
+
+_Copyright © Kostevich Irina. 2023-2024._

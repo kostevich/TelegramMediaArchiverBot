@@ -26,6 +26,7 @@ class Flow:
         
         # Пока поток запущен.
         while True:
+            # Если поток не пуст.
             if len(self.__MessagesBufer) > 0:
                 # Скачиваем файл.
                 self.DownloadFile()
@@ -77,7 +78,7 @@ class Flow:
 
         # Для каждого файла.
         for File in Bufer:
-            
+
             # Если в потоке обнаружен файл, принадлежащий пользователю.
             if int(File["User"]) == UserID:
                 # Переключение статуса.
@@ -102,6 +103,7 @@ class Flow:
 
             # Если такой же файл найден.
             if os.path.exists(f"Data\Files\{User}\{File.file_unique_id}.{File.file_path.split('.')[-1]}"):
+                # Логгирование.
                 logging.info("Файл идентичен уже имеющемуся")
 
                 # Удаление элемента из списка.
@@ -111,6 +113,7 @@ class Flow:
                 # Загрузка файла.
                 Response = requests.get("https://api.telegram.org/file/bot" + self.__Settings["token"] + "/" + f"{File.file_path}")
 
+                # Если индекс точки в названии файла не найден.
                 if str(File.file_path).find('.') == -1:
                     FileType = ''
 

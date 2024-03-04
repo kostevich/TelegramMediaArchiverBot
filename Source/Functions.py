@@ -4,7 +4,7 @@
 #==========================================================================================#
 
 from telebot.types import InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo
-from dublib.Methods import RemoveFolderContent, ReadJSON
+from dublib.Methods import RemoveFolderContent
 from Source.Users import UsersManager
 from .MessageBox import MessageBox
 from telebot import types
@@ -13,7 +13,6 @@ import datetime
 import logging
 import telebot
 import zipfile
-import shutil
 import os
 
 #==========================================================================================#
@@ -93,10 +92,11 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 	Date = str(Date).replace(':', '-').split('.')[0]
 	
 	# Состояние: удалась ли отправка архива.
-	IsSended = False
+	Status = False
 
 	# Если существуют файлы для архивации.
 	while len(os.listdir("Data/Files/" + str(UserID))) > 0:
+
 
 		# Отправка сообщений пользователю.
 		MessageBoxObject.send(ChatID, "archiving", "waiting")
@@ -109,12 +109,10 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 			for file in files:
 				# Создание относительных путей и запись файлов в архив.
 				Archieve.write(os.path.join(root, file))
-		 
-		Archieve.close()
 		
-		# # Архивирование файлов пользователя.
-		# shutil.make_archive(f"Data/Archives/{UserID}/{Date}", "zip", "Data/Files/" + str(UserID))
-
+		# Закрытие архива.
+		Archieve.close()
+	
 		# Очистка файлов пользователя. 
 		RemoveFolderContent("Data/Files/" + str(UserID))
 
@@ -140,31 +138,29 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 				Lenth = len(UnloadedFiles)
 				
 				Media = list()
+
 				if Lenth > 0:
 					# Отправка сообщения.
 					MessageBoxObject.send(ChatID, "mistakes", "waiting")
 					for Sequence in range(Lenth):
 						if UnloadedFiles[Sequence]["type"] == "video":
-						
 							Media.append(InputMediaVideo(media = UnloadedFiles[Sequence]["idfile"]))
 					
 						if UnloadedFiles[Sequence]["type"] == "document": 
-
 							Media.append(InputMediaDocument(media = UnloadedFiles[Sequence]["idfile"]))
 					
-						if UnloadedFiles[Sequence]["type"] == "audio":  
-
+						if UnloadedFiles[Sequence]["type"] == "audio": 
 							Media.append(InputMediaAudio(media = UnloadedFiles[Sequence]["idfile"]))
 
 						if UnloadedFiles[Sequence]["type"] == "photo": 
-
-							Media.append(InputMediaVideo(media = UnloadedFiles[Sequence]["idfile"]))
+							Media.append(InputMediaPhoto(media = UnloadedFiles[Sequence]["idfile"]))
 					
 					# Удаление словаря ошибок отправленного файла.
 					Bot.send_media_group(ChatID, Media)
-
+					
+					# Удаление всех ошибочных файлов из json.
 					UsersManagerObject.set_user_value(UserID, "UnloadedFiles", [])  
-						
+			
 			except Exception as ExceptionData:
 				# Логгирование.
 				logging.info(f"Отправка файла не удалась. {ExceptionData}")
@@ -173,12 +169,18 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 			RemoveFolderContent("Data/Archives/" + str(UserID))
 			
 			# Переключение состояния.
-			IsSended = True
+			Status = True
 
 		except Exception as ExceptionData:
 			# Логгирование.
 			logging.info(f"Отправка архива не удалась. {ExceptionData}")
+
+			# Отправка сообщения.
 			MessageBoxObject.send(UserID, "errorsending", "error" )
-	return IsSended
+			
+			# Переключение состояния.
+			Status = True
+
+	return Status
 
 
