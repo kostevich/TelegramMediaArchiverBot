@@ -3,7 +3,7 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import ReadJSON
+from dublib.Methods.JSON import ReadJSON
 from telebot import TeleBot
 
 class MessageBox:

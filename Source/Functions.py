@@ -4,7 +4,7 @@
 #==========================================================================================#
 
 from telebot.types import InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo
-from dublib.Methods import RemoveFolderContent
+from dublib.Methods.Filesystem import RemoveDirectoryContent
 from Source.Users import UsersManager
 from .MessageBox import MessageBox
 from telebot import types
@@ -97,32 +97,29 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 	# Если существуют файлы для архивации.
 	while len(os.listdir("Data/Files/" + str(UserID))) > 0:
 
-
 		# Отправка сообщений пользователю.
 		MessageBoxObject.send(ChatID, "archiving", "waiting")
-
+		
 		# Создание нового архива.
 		Archieve = zipfile.ZipFile(f'Data/Archives/{UserID}/{Date}.zip', 'w', compression=zipfile.ZIP_DEFLATED, compresslevel = 9)
-
-		for root, dirs, files in os.walk(f'Data\Files\{UserID}'): 
+		for root, dirs, files in os.walk(f'Data/Files/{UserID}'): 
 			# Список всех файлов и папок в директории folder.
 			for file in files:
-				# Создание относительных путей и запись файлов в архив.
-				Archieve.write(os.path.join(root, file))
-		
+				# Создание относительных путей и запись файлов в архив. os.path.join(root, file)
+				Archieve.write(f'Data/Files/{UserID}/{file}', arcname=file)
+
 		# Закрытие архива.
 		Archieve.close()
-	
 		# Очистка файлов пользователя. 
-		RemoveFolderContent("Data/Files/" + str(UserID))
+		RemoveDirectoryContent("Data/Files/" + str(UserID))
 
 		# Бинарное содержимое архива.
 		BinaryArchive = None
-
+		
 		# Чтение архива.
 		with open(f"Data/Archives/{UserID}/{Date}.zip", "rb") as FileReader:
 			BinaryArchive = FileReader.read()
-	
+		
 		try:
 			# Отправка архива пользователю.
 			Bot.send_document(ChatID, BinaryArchive, visible_file_name = f"{Date}.zip")
@@ -166,7 +163,7 @@ def SendArchive(Bot: telebot.TeleBot, UserID: str, ChatID: int, UsersManagerObje
 				logging.info(f"Отправка файла не удалась. {ExceptionData}")
 		
 			# Очистка архивов пользователя. 
-			RemoveFolderContent("Data/Archives/" + str(UserID))
+			RemoveDirectoryContent("Data/Archives/" + str(UserID))
 			
 			# Переключение состояния.
 			Status = True

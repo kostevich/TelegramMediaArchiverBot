@@ -3,7 +3,9 @@
 # >>>>> ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДУЛЕЙ <<<<< #
 #==========================================================================================#
 
-from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
+from dublib.Methods.JSON import ReadJSON
+from dublib.Methods.System import CheckPythonMinimalVersion
+from dublib.Methods.Filesystem import MakeRootDirectories, RemoveDirectoryContent
 from Source.Functions import GenerateStatistics, SendArchive
 from Source.Users import UsersManager
 from Source.MessageBox import MessageBox
@@ -86,7 +88,7 @@ def ProcessCommandArchive(Message: types.Message):
 
     else:
         # Отправить инструкции пользователю.
-        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {"reason": "Идёт загрузка файлов\."})
+        MessageBoxObject.send(Message.chat.id, "expectation", "waiting", {"reason": "Идёт загрузка файлов\\."})
 
 #==========================================================================================#
 # >>>>> ОБРАБОТКА КОМАНДЫ ClEAR <<<<< #
@@ -100,7 +102,7 @@ def ProcessCommandClear(Message: types.Message):
     # Есть ли файлы пользователя в потоке.
     if FlowObject.CheckUserFilesPresence(Message.from_user.id) == False:
         # Удаление файлов пользователя.
-        RemoveFolderContent("Data/Files/" +str(Message.from_user.id))
+        RemoveDirectoryContent("Data/Files/" +str(Message.from_user.id))
 
         # Удаление незагруженных файлов в json.
         UsersManagerObject.set_user_value(Message.from_user.id, "UnloadedFiles", [])
